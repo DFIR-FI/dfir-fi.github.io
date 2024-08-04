@@ -6,7 +6,7 @@
 <a href=/about/>About</a></nav><div class=rss-link><a href=/rss.xml><i class="fa fa-rss"></i></a></div></div></header><main class=flex-fill><div class=container><div class=row><div class=col-12><h1>Contributions welcome</h1><div><h2 id=list-of-dfir-providers>List of DFIR providers</h2><ol><li><a href=https://github.com/dfir-fi/dfir-fi>Fork the source repo</a> and then clone the forked repo.</li></ol><pre tabindex=0><code>gh repo fork https://github.com/dfir-fi/dfir-fi --clone
 </code></pre><ol start=2><li>Create new branch and set upstream to to this repo, example:</li></ol><pre tabindex=0><code>git checkout -b add_accenture
 git remote add upstream https://github.com/dfir-fi/dfir-fi
-</code></pre><ol start=3><li>Add new DFIR provider, example:</li></ol><pre tabindex=0><code>hugo new content/providers/accenture.md
+</code></pre><ol start=3><li>Add new DFIR provider, example:</li></ol><pre tabindex=0><code>hugo new --kind provider content/providers/accenture.md
 </code></pre><ol start=4><li>Add company name and website to the created MD file, example:</li></ol><pre tabindex=0><code>title: (leave it as it was)
 date: (leave it as it was)
 draft: (leave it as it was)
