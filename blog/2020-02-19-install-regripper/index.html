@@ -1,0 +1,56 @@
+<!doctype html><html lang=en><head><meta charset=UTF-8><title>DFIR-FI » [0x4] Installing RegRipper on Linux</title>
+<meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css><link rel=stylesheet href=/css/style.css></head><body><header><div class=menu><div class=hamburger id=hamburger>&#9776;</div><nav class=nav-links id=nav-links><a href=/ class=logo><img src=/images/logo.png alt=Logo></a><div class=separator></div><a href=/contribute/>Contribute</a>
+<a href=/blog/>Blog</a>
+<a href=/training/>Training</a>
+<a href=/community/>Community</a>
+<a href=/about/>About</a></nav><div class=rss-link><a href=/rss.xml><i class="fa fa-rss"></i></a></div></div></header><main class=flex-fill><div class=container><div class=row><div class=col-12><h1>[0x4] Installing RegRipper on Linux</h1><h2 class=subtitle>https://github.com/keydet89/RegRipper2.8.git</h2><div class=tags>Tags «
+<a href=/categories/tools class=tag>tools</a>
+»</div><div class=author-info><div class=author-photo><img src=https://example.org/images/whois.jpg alt="Juho Jauhiainen"></div><div class=author-details><p><strong><a href=/about/whois/>whois</a></strong></p><small class=text-muted><i class="fa-regular fa-calendar"></i> February 19, 2020 | </small><small class=text-muted><i class="fa-regular fa-clock"></i> 3 min read</small></div></div><div class=content><blockquote><p>RegRipper is a tool made by H. Carvey (keydet89) for Windows registry analysis. The tool is perl script that is made to run on Windows. The tool can be installed on Linux distros but I haven&rsquo;t yet found good instructions how to do it to share so I decided to make my own. I use the tool on the forensic courses I teach. Kudos to keydet89 for making this awesome tool.</p></blockquote><p><del>If you are lazy, <a href=https://github.com/who1s/install_regripper>here&rsquo;s</a> an installation script for Ubuntu/Debian.</del>
+<strong>Update 2021</strong>: This blog post is obsolete, please refer official documentation: <a href=https://github.com/keydet89/RegRipper3.0>https://github.com/keydet89/RegRipper3.0</a></p><p>First install dependencies we need in running this tool. For some reason at the time I am writing this blogpost, tests fail after building the Win32Registry module. For this reason, we need to use more force in installation. If you don&rsquo;t want to install the module to the default location, you may want to use -l parameter to give an it another location (f.e. /usr/share/regripper/perlmodules/).</p><pre tabindex=0><code>$ sudo apt-get update &amp;&amp; sudo apt-get install -y cpanminus git
+$ sudo cpanm Parse::Win32Registry --force
+</code></pre><p>After installing the dependencies, we clone the repo.</p><pre tabindex=0><code>$ git clone https://github.com/keydet89/RegRipper2.8.git
+$ cd RegRipper2.8/
+</code></pre><p>As the script is made for Windows, we need to tune it a little. I am going to move the plugins to /usr/share/regripper/ so I need to sed the path into the script. I also want to uncomment all the Linux stuff.</p><pre tabindex=0><code>$ tail -n +2 rip.pl &gt; rip
+$ perl -pi -e &#39;tr[\r][]d&#39; rip
+$ sed -i &#34;1i #\!$(which perl)&#34; rip
+$ sed -i &#39;s/\#my\ \$plugindir/\my\ \$plugindir/g&#39; rip
+$ sed -i &#39;s/\#push/push/&#39; rip
+$ sed -i &#39;s/\&#34;plugins\/\&#34;\;/\&#34;\/usr\/share\/regripper\/plugins\/\&#34;\;/&#39; rip
+$ sed -i &#39;s/(\&#34;plugins\&#34;)\;/(\&#34;\/usr\/share\/regripper\/plugins\&#34;)\;/&#39; rip
+</code></pre><p>Now move the plugins to /usr/share/regripper</p><pre tabindex=0><code>$ sudo mkdir -p /usr/share/regripper/
+$ sudo cp -r plugins/ /usr/share/regripper/
+</code></pre><p>Lastly we need to move our new script to path and reload our configuration</p><pre tabindex=0><code>$ sudo mv rip /usr/local/bin/rip.pl
+$ chmod +x /usr/local/bin/rip.pl
+$ source ~/.bashrc
+</code></pre><p>Now running rip.pl -c -l shoud list you all plugins. :)</p><pre tabindex=0><code> whois@ghost  ~  rip.pl -c -l
+Plugin,Version,Hive,Description
+ssh_host_keys,20120809,NTUSER.DAT,Extracts Putty/WinSCP SSH Host Keys
+typedurlstime,20120613,NTUSER.DAT,Returns contents of user&#39;s TypedURLsTime key.
+fw_config,20080328,System,Gets the Windows Firewall config from the System hive
+yahoo_lm,20101219,SOFTWARE,Yahoo Messenger parser
+...
+
+
+ whois@ghost  ~/Courses/MemForensics/materials/registry  rip.pl -r registry.0xffffbb02f1b77000.SAM.reg -p samparse
+Launching samparse v.20160203
+samparse v.20160203
+(SAM) Parse SAM file for user &amp; group mbrshp info
+
+
+User Information
+-------------------------
+Username        : Administrator [500]
+SID             : S-1-5-21-4219245480-2226696944-1083947594-500
+Full Name       : 
+User Comment    : Built-in account for administering the computer/domain
+Account Type    : 
+Name            :  
+Last Login Date : Never
+Pwd Reset Date  : Never
+Pwd Fail Date   : Never
+Login Count     : 0
+  --&gt; Normal user account
+  --&gt; Password does not expire
+  --&gt; Account Disabled
+...
+</code></pre></div></div></div></div></main><footer class=footer><div class=container><span class=text-muted>&copy; 2024 <a href=/about/whois>Juho Jauhiainen</a>. All rights reserved.</span></div></footer><script src=https://code.jquery.com/jquery-3.5.1.slim.min.js></script><script src=https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js></script><script src=/js/main.js></script></body></html>
