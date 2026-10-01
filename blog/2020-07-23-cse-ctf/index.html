@@ -1,11 +1,11 @@
-<!doctype html><html lang=en><head><meta charset=UTF-8><title>DFIR-FI » [0x6] Cyber Security Essentials CTF</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=stylesheet href=https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css><link rel=stylesheet href=/css/style.css></head><body><header><div class=menu><div class=hamburger id=hamburger>&#9776;</div><nav class=nav-links id=nav-links><a href=/ class=logo><img src=/images/logo.png alt=Logo></a><div class=separator></div><a href=/contribute/>Contribute</a>
-<a href=/blog/>Blog</a>
+<!doctype html><html lang=en><head><meta charset=UTF-8><title>DFIR-FI » [0x6] Cyber Security Essentials CTF</title><meta name=viewport content="width=device-width,initial-scale=1"><meta name=theme-color content="#000000"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css><link rel=stylesheet href=/css/style.css></head><body><header class=site-header><div class=menu><a href=/ class=logo aria-label="DFIR-FI home"><img src=/images/logo.png alt=DFIR-FI>
+</a><button class=hamburger id=hamburger type=button aria-label=Menu aria-controls=nav-links aria-expanded=false>
+<span></span><span></span><span></span></button><nav class=nav-links id=nav-links><a href=/contribute/>Contribute</a>
+<a href=/blog/ class=active aria-current=page>Blog</a>
 <a href=/training/>Training</a>
 <a href=/community/>Community</a>
-<a href=/about/>About</a></nav><div class=rss-link><a href=/rss.xml><i class="fa fa-rss"></i></a></div></div></header><main class=flex-fill><div class=container><div class=row><div class=col-12><h1>[0x6] Cyber Security Essentials CTF</h1><h2 class=subtitle>Write-up</h2><div class=tags>Tags «
-<a href=/categories/tools class=tag>tools</a>
-<a href=/categories/training class=tag>training</a>
-»</div><div class=author-info><div class=author-photo><img src=https://dfir.fi/images/whois.jpg alt="Juho Jauhiainen"></div><div class=author-details><p><strong><a href=/about/whois/>whois</a></strong></p><small class=text-muted><i class="fa-regular fa-calendar"></i> July 23, 2020 | </small><small class=text-muted><i class="fa-regular fa-clock"></i> 25 min read</small></div></div><div class=content><blockquote><p>Cyber Security Essentials is a course series I was organizing in <a href=https://helsec.fi>HelSec</a> with <a href=https://www.futurefemale.com>Future Female</a>. CSE had 6 lectures and the CTF was organized at the end of the course. The course was aimed for female who are interested working in technical side of the Cyber Security OR just started in the field. This CTF was made 99% by me alone and was purposed to be entry level. More information about the course series can be found from <a href=https://www.futurefemale.com/news/future-female-x-helsec-cyber-security-essentials/>here</a>.</p></blockquote><h2 id=results>Results</h2><p>The competition was hosted on CTFd at <a href=https://ctf.helsec.fi>ctf.helsec.fi</a> and here are the top competitors:
+<a href=/about/>About</a>
+<a href=/rss.xml class=rss-link target=_blank rel=noopener aria-label="RSS feed"><i class="fa fa-rss"></i></a></nav></div></header><main><article class="wrap post"><header class="page-head post-head"><a class=back-link href=/blog/>&larr; All posts</a><h1>[0x6] Cyber Security Essentials CTF</h1><p class=subtitle>Write-up</p><dl class=post-meta><div class=post-meta-author><img src=/images/whois.jpg class=author-avatar alt="Juho Jauhiainen"><div><dt>Author</dt><dd><a href=/about/whois/>Juho Jauhiainen</a></dd></div></div><div><dt>Published</dt><dd><time datetime=2020-07-23>July 23, 2020</time></dd></div><div><dt>Reading time</dt><dd>25 min read</dd></div><div><dt>Tags</dt><dd><a href=/categories/tools class=chip>tools</a><a href=/categories/training class=chip>training</a></dd></div></dl></header><div class="content prose"><blockquote><p>Cyber Security Essentials is a course series I was organizing in <a href=https://helsec.fi target=_blank rel=noopener>HelSec</a> with <a href=https://www.futurefemale.com target=_blank rel=noopener>Future Female</a>. CSE had 6 lectures and the CTF was organized at the end of the course. The course was aimed for female who are interested working in technical side of the Cyber Security OR just started in the field. This CTF was made 99% by me alone and was purposed to be entry level. More information about the course series can be found from <a href=https://www.futurefemale.com/news/future-female-x-helsec-cyber-security-essentials/ target=_blank rel=noopener>here</a>.</p></blockquote><h2 id=results>Results</h2><p>The competition was hosted on CTFd at <a href=https://ctf.helsec.fi target=_blank rel=noopener>ctf.helsec.fi</a> and here are the top competitors:
 <img src=/images/blog/cse_top10.png alt=Screenshot></p><p>Congratz all! ᕕ( ՞ ᗜ ՞ )ᕗ</p><hr><h2 id=challenges---q-general>Challenges -> Q: General</h2><h3 id=bash>Bash</h3><blockquote><p>Q: Recap of the Linux commands.
 Download the file and run it.
 P.S. You can cheat in this but I bet it&rsquo;s harder than doing it properly</p></blockquote><p>Purposed way:</p><pre tabindex=0><code>./bash
@@ -35,7 +35,7 @@ Get the flag with command flag
 # flag
 flag{LINUX_IZ_S0_EZ!!}
 # exit
-</code></pre><p>The mentioned unintended way would be reversing it. =)</p><p>However, the flag is: flag{LINUX_IZ_S0_EZ!!}</p><h3 id=numb3rs>numb3rs</h3><blockquote><p>Q: Hello, friend. You don&rsquo;t know me, but I know you. I want to play a game. There is only one combination of numbers that gives you the answer. Know what to do. You better hurry up. Make your choice.</p></blockquote><p>This is a challenge I made last year for <a href=https://disobey.fi>Disobey</a> and <a href=https://nixuchallenge.com>Nixu Challenge</a>. The idea is to make a script that solves the puzzle.</p><p><img src=/images/blog/play_games.png alt=Screenshot></p><p>Here&rsquo;s my quick and dirty version (note that there&rsquo;s lot easier ways to solve this than the code I wrote for this walk-through):</p><pre tabindex=0><code>!/usr/bin/env python3
+</code></pre><p>The mentioned unintended way would be reversing it. =)</p><p>However, the flag is: flag{LINUX_IZ_S0_EZ!!}</p><h3 id=numb3rs>numb3rs</h3><blockquote><p>Q: Hello, friend. You don&rsquo;t know me, but I know you. I want to play a game. There is only one combination of numbers that gives you the answer. Know what to do. You better hurry up. Make your choice.</p></blockquote><p>This is a challenge I made last year for <a href=https://disobey.fi target=_blank rel=noopener>Disobey</a> and <a href=https://nixuchallenge.com target=_blank rel=noopener>Nixu Challenge</a>. The idea is to make a script that solves the puzzle.</p><p><img src=/images/blog/play_games.png alt=Screenshot></p><p>Here&rsquo;s my quick and dirty version (note that there&rsquo;s lot easier ways to solve this than the code I wrote for this walk-through):</p><pre tabindex=0><code>!/usr/bin/env python3
 
 import socket
 import time
@@ -119,7 +119,7 @@ if __name__ == &#34;__main__&#34;:
 </code></pre><p>Running the code will print the flag after a while</p><pre tabindex=0><code>~$ python3 solve.py
 &lt;-- Lot of output redacted --&gt;
 flag{ApPRoVEd_leE7_HAxOr_8END1n9_7hE_71mE}
-</code></pre><p>The flag is: flag{ApPRoVEd_leE7_HAxOr_8END1n9_7hE_71mE}</p><hr><h2 id=challenges---q-security-operations>Challenges -> Q: Security Operations</h2><h3 id=soc-1>SOC #1</h3><blockquote><p>Q: What is the centralized log system called (abbreviation)?</p></blockquote><p><a href=https://en.wikipedia.org/wiki/Security_information_and_event_management>SIEM</a></p><h3 id=soc-2>SOC #2</h3><blockquote><p>Q: Which HTTP command lists all available methods (GET, POST etc.)?</p></blockquote><p><a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS>OPTIONS</a></p><h3 id=soc-3>SOC #3</h3><blockquote><p>Q: There&rsquo;s Linux/Tsunami DOS related traffic in the access.log. What is the corresponding IP address of potentially infected host?</p></blockquote><p>Google: &ldquo;Linux/Tsunami DOS&rdquo; and find out <a href=https://doc.emergingthreats.net/bin/view/Main/2022760>User-Agent x00_-gawa.sa.pilipinas.2015</a>.</p><pre tabindex=0><code>~$ grep &#34;x00_-gawa.sa.pilipinas.2015&#34; access.log
+</code></pre><p>The flag is: flag{ApPRoVEd_leE7_HAxOr_8END1n9_7hE_71mE}</p><hr><h2 id=challenges---q-security-operations>Challenges -> Q: Security Operations</h2><h3 id=soc-1>SOC #1</h3><blockquote><p>Q: What is the centralized log system called (abbreviation)?</p></blockquote><p><a href=https://en.wikipedia.org/wiki/Security_information_and_event_management target=_blank rel=noopener>SIEM</a></p><h3 id=soc-2>SOC #2</h3><blockquote><p>Q: Which HTTP command lists all available methods (GET, POST etc.)?</p></blockquote><p><a href=https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/OPTIONS target=_blank rel=noopener>OPTIONS</a></p><h3 id=soc-3>SOC #3</h3><blockquote><p>Q: There&rsquo;s Linux/Tsunami DOS related traffic in the access.log. What is the corresponding IP address of potentially infected host?</p></blockquote><p>Google: &ldquo;Linux/Tsunami DOS&rdquo; and find out <a href=https://doc.emergingthreats.net/bin/view/Main/2022760 target=_blank rel=noopener>User-Agent x00_-gawa.sa.pilipinas.2015</a>.</p><pre tabindex=0><code>~$ grep &#34;x00_-gawa.sa.pilipinas.2015&#34; access.log
 138.121.183.58 - - [22/Sep/2015:13:23:27 +0000] &#34;GET /Ringing.at.your.dorbell! HTTP/1.0&#34; 404 459 &#34;http://google.com/search?q=2+guys+1+horse&#34; &#34;x00_-gawa.sa.pilipinas.2015&#34;
 37.17.130.36 - - [01/Oct/2015:01:26:48 +0000] &#34;GET /Ringing.at.your.dorbell! HTTP/1.0&#34; 404 459 &#34;http://google.com/search?q=2+guys+1+horse&#34; &#34;x00_-gawa.sa.pilipinas.2015&#34;
 37.17.130.36 - - [01/Oct/2015:01:26:48 +0000] &#34;GET / HTTP/1.0&#34; 200 329 &#34;-&#34; &#34;x00_-gawa.sa.pilipinas.2015&#34;
@@ -147,7 +147,7 @@ somethingspecial.helsec.fi descriptive text &#34;c3ludHtHVVJFUl9WRl9OWUpOTEZfRkJ
 synt{GURER_VF_NYJNLF_FBZRGUVAT_VA_QAF}
 ~$ echo &#34;c3ludHtHVVJFUl9WRl9OWUpOTEZfRkJaUkdVVkFUX1ZBX1FBRn0K&#34;|base64 -d|rot13
 flag{THERE_IS_ALWAYS_SOMETHING_IN_DNS}
-</code></pre><h3 id=osint-3>OSINT #3</h3><blockquote><p>Q: Rodrigo Gonzales is slipping from OPSEC on their recent beer related social media post.</p></blockquote><p><a href=https://twitter.com/rodrigo_gonaz/status/1270298024774959104>https://twitter.com/rodrigo_gonaz/status/1270298024774959104</a></p><pre tabindex=0><code>~$ echo &#34;ZmxhZ3swUFMzQ30K&#34;|base64 -d
+</code></pre><h3 id=osint-3>OSINT #3</h3><blockquote><p>Q: Rodrigo Gonzales is slipping from OPSEC on their recent beer related social media post.</p></blockquote><p><a href=https://twitter.com/rodrigo_gonaz/status/1270298024774959104 target=_blank rel=noopener>https://twitter.com/rodrigo_gonaz/status/1270298024774959104</a></p><pre tabindex=0><code>~$ echo &#34;ZmxhZ3swUFMzQ30K&#34;|base64 -d
 flag{0PS3C}
 </code></pre><hr><h2 id=challenges---q-memory-forensics>Challenges -> Q: Memory forensics</h2><h3 id=volatility-profile>Volatility profile</h3><blockquote><p>Q: What is the correct Volatility profile of the image file?</p></blockquote><p>The profile can be determined using imageinfo and kdbgscan. The kdbgscan gives following result:</p><pre tabindex=0><code>**************************************************
 Instantiating KDBG using: Unnamed AS Win10x64_14393 (6.4.14393 64bit)
@@ -530,7 +530,7 @@ Warning: no OpenMP support for this hash type, consider --fork=4
 Press &#39;q&#39; or Ctrl-C to abort, almost any other key for status
 0g 0:00:00:00 DONE (2020-07-23 08:50) 0g/s 18873Kp/s 18873Kc/s 18873KC/s      markinho..*7¡Vamos!
 Session completed
-</code></pre><p>Maybe we should get better wordlist? Let&rsquo;s try this one: <a href=https://github.com/jvesiluoma/wordlists/blob/master/fin-swe-passwdlist.7z>https://github.com/jvesiluoma/wordlists/blob/master/fin-swe-passwdlist.7z</a></p><pre tabindex=0><code>~$ wget https://github.com/jvesiluoma/wordlists/raw/master/fin-swe-passwdlist.7z
+</code></pre><p>Maybe we should get better wordlist? Let&rsquo;s try this one: <a href=https://github.com/jvesiluoma/wordlists/blob/master/fin-swe-passwdlist.7z target=_blank rel=noopener>https://github.com/jvesiluoma/wordlists/blob/master/fin-swe-passwdlist.7z</a></p><pre tabindex=0><code>~$ wget https://github.com/jvesiluoma/wordlists/raw/master/fin-swe-passwdlist.7z
 ~$ 7z x fin-swe-passwdlist.7z
 ~$ sudo john --format=NT --wordlist=fin-swe-passwdlist.7z hash.txt
 Using default input encoding: UTF-8
@@ -549,7 +549,7 @@ perse500!        (Rodrigo Gonzales)
 1g 0:00:00:00 DONE (2020-07-23 08:59) 20.00g/s 11533Kp/s 11533Kc/s 11533KC/s Perse..\PersistentAddinsRegistered
 Use the &#34;--show --format=NT&#34; options to display all of the cracked passwords reliably
 Session completed
-</code></pre><p>Password for Rodrigo Gonzales is &ldquo;perse500!&rdquo;. The password was supposed to be Perse500, which is on <a href=https://twitter.com/jvesiluoma>jvesiluoma&rsquo;s</a> combination list.</p><hr><h2 id=challenges---q-web>Challenges -> Q: Web</h2><h3 id=discovering-tcp-1>Discovering TCP #1</h3><blockquote><p>Q: What abnormal TCP port is open on target.helsec.fi?</p></blockquote><p>Let&rsquo;s NMAP</p><pre tabindex=0><code>~$ sudo nmap target.helsec.fi -v
+</code></pre><p>Password for Rodrigo Gonzales is &ldquo;perse500!&rdquo;. The password was supposed to be Perse500, which is on <a href=https://twitter.com/jvesiluoma target=_blank rel=noopener>jvesiluoma&rsquo;s</a> combination list.</p><hr><h2 id=challenges---q-web>Challenges -> Q: Web</h2><h3 id=discovering-tcp-1>Discovering TCP #1</h3><blockquote><p>Q: What abnormal TCP port is open on target.helsec.fi?</p></blockquote><p>Let&rsquo;s NMAP</p><pre tabindex=0><code>~$ sudo nmap target.helsec.fi -v
 Starting Nmap 7.80 ( https://nmap.org ) at 2020-07-18 14:27 EDT
 Initiating Ping Scan at 14:27
 Scanning target.helsec.fi (167.71.0.121) [4 ports]
@@ -580,7 +580,7 @@ target.helsec.fi has address 167.71.0.121
 PLZ ANSWER SOMETHING
 SOMETHING
 flag{INTERACTING_WITH_SOCKETS_IS_EZ}
-</code></pre><h3 id=discovering-udp>Discovering UDP</h3><blockquote><p>Q: What abnormal UDP port is open on target.helsec.fi?</p></blockquote><p>I&rsquo;ve no idea what I&rsquo;ve been thinking when I created the challenge. The listener I coded does not response anything which means there&rsquo;s no way to solve this challenge out. =)</p><p>The answer however was 13.</p><h3 id=web-1>Web #1</h3><blockquote><p>Q: Find the secret admin panel on <a href=http://target.helsec.fi>http://target.helsec.fi</a>.</p></blockquote><p>Let&rsquo;s fuzz the web:</p><pre tabindex=0><code>~$ ffuf -u http://target.helsec.fi/FUZZ -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt                                              
+</code></pre><h3 id=discovering-udp>Discovering UDP</h3><blockquote><p>Q: What abnormal UDP port is open on target.helsec.fi?</p></blockquote><p>I&rsquo;ve no idea what I&rsquo;ve been thinking when I created the challenge. The listener I coded does not response anything which means there&rsquo;s no way to solve this challenge out. =)</p><p>The answer however was 13.</p><h3 id=web-1>Web #1</h3><blockquote><p>Q: Find the secret admin panel on <a href=http://target.helsec.fi target=_blank rel=noopener>http://target.helsec.fi</a>.</p></blockquote><p>Let&rsquo;s fuzz the web:</p><pre tabindex=0><code>~$ ffuf -u http://target.helsec.fi/FUZZ -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt                                              
 
         /&#39;___\  /&#39;___\           /&#39;___\       
        /\ \__/ /\ \__/  __  __  /\ \__/       
@@ -695,7 +695,7 @@ ________________________________________________
 :: Progress: [2439/2439] :: Job [1/1] :: 1219 req/sec :: Duration: [0:00:02] :: Errors: 0 ::
 ~$ curl http://target.helsec.fi/web-console/Invoker
 flag{TH1S_WAS_QUICK_HIT}
-</code></pre><p>Boom, we got a flag: flag{TH1S_WAS_QUICK_HIT}</p><h3 id=web-2>Web #2</h3><blockquote><p>Q: There&rsquo;s a png file on <a href=http://target.helsec.fi>http://target.helsec.fi</a>. Find it.</p></blockquote><p>Let&rsquo;s see if there is png files in the personals directory we found in the previous challenge:</p><pre tabindex=0><code>~$ ffuf -u http://target.helsec.fi/personals/FUZZ.png -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+</code></pre><p>Boom, we got a flag: flag{TH1S_WAS_QUICK_HIT}</p><h3 id=web-2>Web #2</h3><blockquote><p>Q: There&rsquo;s a png file on <a href=http://target.helsec.fi target=_blank rel=noopener>http://target.helsec.fi</a>. Find it.</p></blockquote><p>Let&rsquo;s see if there is png files in the personals directory we found in the previous challenge:</p><pre tabindex=0><code>~$ ffuf -u http://target.helsec.fi/personals/FUZZ.png -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
 
         /&#39;___\  /&#39;___\           /&#39;___\       
        /\ \__/ /\ \__/  __  __  /\ \__/       
@@ -721,7 +721,7 @@ whois                   [Status: 200, Size: 40, Words: 1, Lines: 2]
 :: Progress: [4655/4655] :: Job [1/1] :: 1163 req/sec :: Duration: [0:00:04] :: Errors: 0 ::
 </code></pre><p>OMG! A photo of me, this can&rsquo;t be good:</p><pre tabindex=0><code>curl http://target.helsec.fi/personals/whois.png
 flag{THANK_GOD_THERE_WAS_NO_PHOTO_HERE}
-</code></pre><p>What the flag says&mldr; flag{THANK_GOD_THERE_WAS_NO_PHOTO_HERE}</p><h3 id=web-3>Web #3</h3><blockquote><p>Q: Check the other project on <a href=http://target.helsec.fi>http://target.helsec.fi</a> as well.</p></blockquote><p>There&rsquo;s some other project mentioned on the front page:</p><pre tabindex=0><code>~$ curl http://target.helsec.fi
+</code></pre><p>What the flag says&mldr; flag{THANK_GOD_THERE_WAS_NO_PHOTO_HERE}</p><h3 id=web-3>Web #3</h3><blockquote><p>Q: Check the other project on <a href=http://target.helsec.fi target=_blank rel=noopener>http://target.helsec.fi</a> as well.</p></blockquote><p>There&rsquo;s some other project mentioned on the front page:</p><pre tabindex=0><code>~$ curl http://target.helsec.fi
 &lt;!doctype html&gt;
 
 &lt;html lang=&#34;en&#34;&gt;
@@ -741,9 +741,9 @@ flag{THANK_GOD_THERE_WAS_NO_PHOTO_HERE}
 &lt;/html&gt;
 </code></pre><p>Let&rsquo;s check it:</p><pre tabindex=0><code>~$ host loremipsum.helsec.fi
 loremipsum.helsec.fi has address 127.0.0.1
-</code></pre><p>The domain is pointing to localhost, maybe it&rsquo;s a <a href=https://www.webopedia.com/TERM/V/virtual_host.html>vhost</a>?</p><pre tabindex=0><code>~$ curl -H &#34;Host: loremipsum.helsec.fi&#34; http://target.helsec.fi
+</code></pre><p>The domain is pointing to localhost, maybe it&rsquo;s a <a href=https://www.webopedia.com/TERM/V/virtual_host.html target=_blank rel=noopener>vhost</a>?</p><pre tabindex=0><code>~$ curl -H &#34;Host: loremipsum.helsec.fi&#34; http://target.helsec.fi
 flag{VHOSTS_ARE_OFTEN_USED_IN_HAXXOR_CHALLENGES}
-</code></pre><p>Aaaand we got a flag!!!</p><h3 id=web-4>Web #4</h3><blockquote><p>Q: There&rsquo;s something more in <a href=http://loremipsum.helsec.fi>http://loremipsum.helsec.fi</a>&mldr;. Can you find it?</p></blockquote><p>Time to fuff again:</p><pre tabindex=0><code>~$ ffuf -H &#34;Host: loremipsum.helsec.fi&#34; -u http://target.helsec.fi/FUZZ -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
+</code></pre><p>Aaaand we got a flag!!!</p><h3 id=web-4>Web #4</h3><blockquote><p>Q: There&rsquo;s something more in <a href=http://loremipsum.helsec.fi target=_blank rel=noopener>http://loremipsum.helsec.fi</a>&mldr;. Can you find it?</p></blockquote><p>Time to fuff again:</p><pre tabindex=0><code>~$ ffuf -H &#34;Host: loremipsum.helsec.fi&#34; -u http://target.helsec.fi/FUZZ -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt
 
         /&#39;___\  /&#39;___\           /&#39;___\       
        /\ \__/ /\ \__/  __  __  /\ \__/       
@@ -769,7 +769,7 @@ ________________________________________________
 .git/HEAD               [Status: 200, Size: 23, Words: 2, Lines: 2]
 index.html              [Status: 200, Size: 49, Words: 1, Lines: 2]
 :: Progress: [4655/4655] :: Job [1/1] :: 1163 req/sec :: Duration: [0:00:04] :: Errors: 0 ::
-</code></pre><p>OMG, there&rsquo;s a git repo. Let&rsquo;s get it using <a href=https://github.com/arthaud/git-dumper>git-dumper</a>! But first add the vhost to hosts file:</p><pre tabindex=0><code>cat /etc/hosts
+</code></pre><p>OMG, there&rsquo;s a git repo. Let&rsquo;s get it using <a href=https://github.com/arthaud/git-dumper target=_blank rel=noopener>git-dumper</a>! But first add the vhost to hosts file:</p><pre tabindex=0><code>cat /etc/hosts
 127.0.0.1	localhost
 127.0.1.1	kali
 
@@ -833,4 +833,4 @@ ff02::2 ip6-allrouters
 flag.txt
 ~$ cat dump/flag.txt
 flag{LEAVING_GITS_OPEN_LIKE_THIS_IS_DANGEROUS}
-</code></pre><p>The flag is: flag{LEAVING_GITS_OPEN_LIKE_THIS_IS_DANGEROUS}</p><hr></div></div></div></div></main><footer class=footer><div class=container><span class=text-muted>&copy; 2026 <a href=/about/whois>Juho Jauhiainen</a>. All rights reserved.</span></div></footer><script src=https://code.jquery.com/jquery-3.5.1.slim.min.js></script><script src=https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js></script><script src=/js/main.js></script></body></html>
+</code></pre><p>The flag is: flag{LEAVING_GITS_OPEN_LIKE_THIS_IS_DANGEROUS}</p><hr></div></article></main><footer class=footer><a class=mark-link href=https://0j.fi target=_blank rel=noopener aria-label="0J Consulting Oy"><img class=footer-mark src=/images/0j-mark.jpg width=120 height=120 alt="0J Consulting Oy mark"></a><p class=legal>&copy; 2026 dfir.fi &#183; operated by <a href=https://0j.fi target=_blank rel=noopener>0J Consulting Oy</a></p></footer><script src=/js/main.js defer></script></body></html>
